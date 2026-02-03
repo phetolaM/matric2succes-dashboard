@@ -4,20 +4,6 @@
   "installCommand": "npm install",
   "framework": "nextjs",
   "regions": ["lhr1"],
-  "env": {
-    "MONGODB_URI": "@mongodb_uri",
-    "MONGODB_ADMIN_DB": "@mongodb_admin_db",
-    "MONGODB_EMAIL_DB": "@mongodb_email_db",
-    "MONGODB_NEWSLETTER_DB": "@mongodb_newsletter_db",
-    "MONGODB_UNIVERSITY_DB": "@mongodb_university_db",
-    "NEXT_PUBLIC_SUPABASE_URL": "@next_public_supabase_url",
-    "NEXT_PUBLIC_SUPABASE_ANON_KEY": "@next_public_supabase_anon_key",
-    "JWT_SECRET": "@jwt_secret",
-    "SMTP_HOST": "@smtp_host",
-    "SMTP_PORT": "@smtp_port",
-    "SMTP_USER": "@smtp_user",
-    "SMTP_PASS": "@smtp_pass"
-  },
   "cleanUrls": true,
   "trailingSlash": false,
   "rewrites": [
