@@ -1,0 +1,70 @@
+.container {
+    min-height: 100vh;
+    background:
+        radial-gradient(circle at 10% 20%, #e8f4f0, #f8fafc 40%),
+        radial-gradient(circle at 80% 0%, #e5f1ff, #f8fafc 45%),
+        linear-gradient(135deg, #f7fafc, #eef7f3 60%, #e7f2eb);
+    padding: 2.5rem 1.5rem 3rem;
+}
+
+.header {
+    max-width: 1200px;
+    margin: 0 auto 2rem;
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+}
+
+.backButton {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1rem;
+    border-radius: 12px;
+    border: 1px solid #d1d5db;
+    background: white;
+    color: #0b4330;
+    cursor: pointer;
+    font-weight: 700;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+}
+
+.backButton:hover {
+    background: #f3f4f6;
+    border-color: #9ca3af;
+}
+
+.label {
+    margin: 0;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    font-size: 0.8rem;
+    color: #6b7280;
+}
+
+.title {
+    margin: 0.1rem 0 0;
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: #0b4330;
+}
+
+.errorCard {
+    max-width: 1200px;
+    margin: 0 auto 1.5rem;
+    background: #fef2f2;
+    color: #7b1b1b;
+    border: 1px solid #fecdd3;
+    padding: 1rem;
+    border-radius: 12px;
+}
+
+.container > :last-child {
+    max-width: 1200px;
+    margin: 0 auto;
+    background: white;
+    padding: 2rem;
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+}

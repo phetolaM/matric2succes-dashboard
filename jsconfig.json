@@ -1,7 +1,10 @@
 {
-  "compilerOptions": {
-    "paths": {
-      "@/*": ["./*"]
+    "compilerOptions": {
+        "paths": {
+            "@/*": ["./*"],
+            "@/lib/*": ["./lib/*"],
+            "@/app/*": ["./app/*"],
+            "@/public/*": ["./public/*"]
+        }
     }
-  }
 }

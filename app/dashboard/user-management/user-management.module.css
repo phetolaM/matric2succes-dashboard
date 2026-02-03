@@ -1,0 +1,513 @@
+.container {
+    min-height: 100vh;
+    background: linear-gradient(135deg, #f8fafb 0%, #e8f4f0 100%);
+}
+
+/* Header */
+.header {
+    background: linear-gradient(135deg, #00563b 0%, #007850 100%);
+    box-shadow: 0 4px 20px rgba(0, 86, 59, 0.15);
+    padding: 1.5rem 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 2rem;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+.backButton {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: rgba(255, 255, 255, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: white;
+    padding: 0.7rem 1.2rem;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.95rem;
+    transition: all 0.3s ease;
+}
+
+.backButton:hover {
+    background: rgba(255, 255, 255, 0.3);
+    border-color: rgba(255, 255, 255, 0.5);
+}
+
+.titleContainer {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex: 1;
+}
+
+.titleIcon {
+    font-size: 2rem;
+    color: white;
+}
+
+.titleContainer h2 {
+    color: white;
+    margin: 0;
+    font-size: 1.75rem;
+    font-weight: 700;
+}
+
+.refreshButton {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: rgba(255, 255, 255, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: white;
+    padding: 0.7rem 1.2rem;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.95rem;
+    transition: all 0.3s ease;
+}
+
+.refreshButton:hover:not(:disabled) {
+    background: rgba(255, 255, 255, 0.3);
+    border-color: rgba(255, 255, 255, 0.5);
+}
+
+.refreshButton:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.spin {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Error Message */
+.errorMessage {
+    background: #ffebee;
+    color: #d32f2f;
+    padding: 1rem 2rem;
+    margin: 1rem 2rem;
+    border-radius: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    box-shadow: 0 2px 8px rgba(211, 47, 47, 0.2);
+}
+
+.errorMessage button {
+    background: #d32f2f;
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: all 0.3s ease;
+}
+
+.errorMessage button:hover {
+    background: #b71c1c;
+}
+
+/* Stats Card */
+.statsCard {
+    background: white;
+    padding: 1.5rem 2rem;
+    margin: 2rem;
+    border-radius: 12px;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+    display: flex;
+    align-items: center;
+}
+
+.statItem {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+}
+
+.statIcon {
+    font-size: 2.5rem;
+    color: #ef4444;
+}
+
+.statLabel {
+    display: block;
+    color: #6b7280;
+    font-size: 0.875rem;
+    margin-bottom: 0.25rem;
+}
+
+.statValue {
+    display: block;
+    color: #1f2937;
+    font-size: 2rem;
+    font-weight: 700;
+}
+
+/* Actions Bar */
+.actionsBar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1.5rem;
+    padding: 0 2rem 1.5rem 2rem;
+}
+
+.searchContainer {
+    flex: 1;
+    position: relative;
+}
+
+.searchIcon {
+    position: absolute;
+    left: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #9ca3af;
+    font-size: 1.25rem;
+}
+
+.searchContainer input {
+    width: 100%;
+    padding: 0.75rem 1rem 0.75rem 2.75rem;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    transition: all 0.3s ease;
+    background: white;
+}
+
+.searchContainer input:focus {
+    outline: none;
+    border-color: #00563b;
+    box-shadow: 0 0 0 3px rgba(0, 86, 59, 0.1);
+}
+
+.exportButton {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: #00563b;
+    color: white;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.95rem;
+    transition: all 0.3s ease;
+}
+
+.exportButton:hover:not(:disabled) {
+    background: #004d31;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 86, 59, 0.3);
+}
+
+.exportButton:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Loading Container */
+.loadingContainer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 300px;
+    gap: 1rem;
+    color: #666;
+}
+
+.spinner {
+    width: 40px;
+    height: 40px;
+    border: 4px solid #f3f3f3;
+    border-top: 4px solid #00563b;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+/* Email List Container */
+.emailListContainer {
+    padding: 0 2rem;
+    margin-bottom: 2rem;
+}
+
+/* Empty State */
+.emptyState {
+    background: white;
+    padding: 3rem 2rem;
+    border-radius: 12px;
+    text-align: center;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+}
+
+.emptyIcon {
+    font-size: 3.5rem;
+    color: #d1d5db;
+    margin-bottom: 1rem;
+}
+
+.emptyState p {
+    color: #6b7280;
+    font-size: 1.1rem;
+    margin: 0 0 1.5rem 0;
+}
+
+.clearSearchButton {
+    background: #00563b;
+    color: white;
+    border: none;
+    padding: 0.6rem 1.2rem;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.clearSearchButton:hover {
+    background: #004d31;
+}
+
+/* Email List */
+.emailList {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    background: white;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+}
+
+.emailItem {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid #e5e7eb;
+    transition: background-color 0.3s ease;
+}
+
+.emailItem:last-child {
+    border-bottom: none;
+}
+
+.emailItem:hover {
+    background-color: #f9fafb;
+}
+
+.emailIcon {
+    font-size: 1.25rem;
+    color: #ef4444;
+    flex-shrink: 0;
+}
+
+.emailAddress {
+    flex: 1;
+    color: #1f2937;
+    font-weight: 500;
+    word-break: break-all;
+}
+
+.emailDate {
+    color: #9ca3af;
+    font-size: 0.875rem;
+    white-space: nowrap;
+    margin-left: 1rem;
+}
+
+.deleteButton {
+    background: transparent;
+    border: 1px solid #fee2e2;
+    color: #dc2626;
+    padding: 0.5rem;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    flex-shrink: 0;
+}
+
+.deleteButton:hover:not(:disabled) {
+    background: #fee2e2;
+    border-color: #dc2626;
+}
+
+.deleteButton:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* Modal Overlay */
+.modalOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    padding: 1rem;
+}
+
+/* Delete Modal */
+.deleteModal {
+    background: white;
+    border-radius: 12px;
+    padding: 2rem;
+    max-width: 400px;
+    width: 100%;
+    box-shadow: 0 20px 25px rgba(0, 0, 0, 0.15);
+    animation: slideUp 0.3s ease;
+}
+
+@keyframes slideUp {
+    from {
+        transform: translateY(20px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.deleteModal h3 {
+    color: #1f2937;
+    margin: 0 0 1rem 0;
+    font-size: 1.25rem;
+    font-weight: 600;
+}
+
+.deleteModal p {
+    color: #6b7280;
+    margin: 0 0 1.5rem 0;
+    line-height: 1.6;
+}
+
+.deleteModal strong {
+    color: #1f2937;
+}
+
+/* Modal Actions */
+.modalActions {
+    display: flex;
+    gap: 1rem;
+}
+
+.cancelButton,
+.confirmDeleteButton {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1rem;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.cancelButton {
+    background: white;
+    color: #6b7280;
+}
+
+.cancelButton:hover:not(:disabled) {
+    background: #f9fafb;
+    border-color: #d1d5db;
+}
+
+.confirmDeleteButton {
+    background: #dc2626;
+    color: white;
+    border-color: #dc2626;
+}
+
+.confirmDeleteButton:hover:not(:disabled) {
+    background: #b91c1c;
+    border-color: #b91c1c;
+}
+
+.cancelButton:disabled,
+.confirmDeleteButton:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+
+    .titleContainer {
+        width: 100%;
+    }
+
+    .backButton,
+    .refreshButton {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .actionsBar {
+        flex-direction: column;
+        padding: 0 1rem 1rem 1rem;
+    }
+
+    .searchContainer input {
+        width: 100%;
+    }
+
+    .exportButton {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .statsCard {
+        margin: 1rem;
+    }
+
+    .emailListContainer {
+        padding: 0 1rem;
+    }
+
+    .emailItem {
+        flex-wrap: wrap;
+        padding: 1rem;
+    }
+
+    .emailDate {
+        order: 3;
+        width: 100%;
+        margin-left: 0;
+        margin-top: 0.5rem;
+        text-align: right;
+    }
+
+    .deleteModal {
+        max-width: 100%;
+        padding: 1.5rem;
+    }
+}

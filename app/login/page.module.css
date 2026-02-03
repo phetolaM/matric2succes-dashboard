@@ -1,0 +1,188 @@
+.container {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 86, 59, 0.4)), 
+              url('../../public//image2.jpg'); /* Professional Office Background */
+  /* background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 86, 59, 0.4)), 
+              url('https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&q=80');  */
+  background-size: cover;
+  background-position: center;
+  font-family: 'Inter', -apple-system, sans-serif;
+}
+
+/* Floating Decorative Shapes */
+.backgroundShapes div {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(0, 86, 59, 0.2);
+  filter: blur(60px);
+  z-index: 0;
+  animation: float 20s infinite alternate;
+}
+
+.shape1 { width: 400px; height: 400px; top: -100px; left: -100px; }
+.shape2 { width: 300px; height: 300px; bottom: -50px; right: -50px; animation-delay: -5s; }
+
+@keyframes float {
+  from { transform: translate(0, 0); }
+  to { transform: translate(50px, 100px); }
+}
+
+/* The Login Card */
+.card {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 420px;
+  padding: 2.5rem;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border-radius: 16px;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2);
+  animation: slideUp 0.6s ease-out;
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.iconWrapper {
+  background: #00563b;
+  width: 60px;
+  height: 60px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 1rem;
+}
+
+.logo { color: white; font-size: 1.8rem; }
+.title { color: #1a1a1a; font-size: 1.75rem; font-weight: 700; margin: 0; }
+.subtitle { color: #666; font-size: 0.9rem; margin-top: 0.25rem; }
+
+/* Form Elements */
+.formGroup { margin-bottom: 1.5rem; }
+.label { display: block; font-size: 0.875rem; font-weight: 600; color: #333; margin-bottom: 0.5rem; }
+
+.inputGroup {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.icon {
+  position: absolute;
+  left: 1rem;
+  color: #00563b;
+  opacity: 0.7;
+}
+
+.input {
+  width: 100%;
+  padding: 0.8rem 1rem 0.8rem 2.8rem;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+}
+
+.input:focus {
+  outline: none;
+  border-color: #00563b;
+  box-shadow: 0 0 0 3px rgba(0, 86, 59, 0.1);
+}
+
+.toggle {
+  position: absolute;
+  right: 1rem;
+  background: none;
+  border: none;
+  color: #666;
+  cursor: pointer;
+  display: flex;
+}
+
+/* Error Message */
+.error {
+  background: #fff1f2;
+  color: #e11d48;
+  padding: 0.75rem;
+  border-radius: 8px;
+  margin-bottom: 1.5rem;
+  font-size: 0.875rem;
+  text-align: center;
+  border: 1px solid #fecdd3;
+}
+
+/* Button & Animations */
+.button {
+  width: 100%;
+  padding: 0.8rem;
+  background: #00563b;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.2s, background 0.3s;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.button:hover:not(:disabled) {
+  background: #00442e;
+  transform: translateY(-1px);
+}
+
+.button:active { transform: translateY(0); }
+
+.button:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.spinner {
+  width: 18px;
+  height: 18px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.footer {
+  text-align: center;
+  margin-top: 1.5rem;
+}
+
+.link {
+  color: #00563b;
+  font-size: 0.875rem;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.link:hover { text-decoration: underline; }
+
+/* Responsive adjustments */
+@media (max-width: 480px) {
+  .card { margin: 1rem; padding: 1.5rem; }
+}

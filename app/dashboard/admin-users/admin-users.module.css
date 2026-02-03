@@ -1,0 +1,615 @@
+/* Container */
+.container {
+    min-height: 100vh;
+    background: linear-gradient(135deg, #f8fafb 0%, #e8f4f0 100%);
+}
+
+/* Header */
+.header {
+    background: linear-gradient(135deg, #00563b 0%, #007850 100%);
+    box-shadow: 0 4px 20px rgba(0, 86, 59, 0.15);
+    animation: slideDown 0.5s ease-out;
+}
+
+.headerContent {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.backButton {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: white;
+    padding: 0.625rem 1.25rem;
+    border-radius: 10px;
+    font-size: 0.9375rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    width: fit-content;
+}
+
+.backButton:hover {
+    background: rgba(255, 255, 255, 0.25);
+    transform: translateX(-5px);
+}
+
+.headerTitle {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    color: white;
+}
+
+.headerIcon {
+    font-size: 3rem;
+    opacity: 0.9;
+}
+
+.headerTitle h1 {
+    font-size: 2.25rem;
+    font-weight: 700;
+    margin: 0 0 0.25rem 0;
+    letter-spacing: -0.5px;
+}
+
+.headerTitle p {
+    font-size: 1rem;
+    margin: 0;
+    opacity: 0.85;
+}
+
+/* Error Banner */
+.errorBanner {
+    max-width: 1400px;
+    margin: 1.5rem auto 0;
+    padding: 1rem 2rem;
+    background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+    border-left: 4px solid #ef4444;
+    border-radius: 12px;
+    animation: shake 0.5s ease-in-out;
+}
+
+.errorBanner span {
+    color: #991b1b;
+    font-weight: 600;
+    font-size: 0.9375rem;
+}
+
+/* Main Content */
+.main {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 2rem;
+    animation: fadeIn 0.6s ease-out;
+}
+
+/* Action Bar */
+.actionBar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    gap: 1.5rem;
+}
+
+.statsCards {
+    display: flex;
+    gap: 1rem;
+}
+
+.statCard {
+    background: white;
+    border-radius: 12px;
+    padding: 1.25rem 1.75rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.statLabel {
+    font-size: 0.875rem;
+    color: #6b7280;
+    font-weight: 500;
+}
+
+.statValue {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #00563b;
+}
+
+.addButton {
+    display: flex;
+    align-items: center;
+    gap: 0.625rem;
+    background: linear-gradient(135deg, #00563b 0%, #007850 100%);
+    color: white;
+    border: none;
+    padding: 0.875rem 1.75rem;
+    border-radius: 12px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(0, 86, 59, 0.3);
+}
+
+.addButton:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0, 86, 59, 0.4);
+}
+
+.addButtonActive {
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3);
+}
+
+.addButtonActive:hover {
+    box-shadow: 0 8px 25px rgba(239, 68, 68, 0.4);
+}
+
+/* Form Card */
+.formCard {
+    background: white;
+    border-radius: 16px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    animation: slideDown 0.4s ease-out;
+    border: 2px solid #00563b;
+}
+
+.addForm {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.formTitle {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #1f2937;
+    margin: 0;
+    padding-bottom: 1rem;
+    border-bottom: 2px solid #e5e7eb;
+}
+
+.formError {
+    background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+    border-left: 4px solid #ef4444;
+    border-radius: 8px;
+    padding: 0.875rem 1rem;
+    color: #991b1b;
+    font-weight: 600;
+    font-size: 0.875rem;
+    animation: shake 0.5s ease-in-out;
+}
+
+.formRow {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+}
+
+.formGroup {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.formGroup label {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #374151;
+}
+
+.formGroup input,
+.select {
+    padding: 0.875rem 1rem;
+    border: 2px solid #e5e7eb;
+    border-radius: 10px;
+    font-size: 1rem;
+    color: #1f2937;
+    background: white;
+    transition: all 0.3s ease;
+}
+
+.formGroup input:focus,
+.select:focus {
+    outline: none;
+    border-color: #00563b;
+    box-shadow: 0 0 0 4px rgba(0, 86, 59, 0.1);
+}
+
+.formGroup input::placeholder {
+    color: #9ca3af;
+}
+
+.submitButton {
+    padding: 1rem;
+    background: linear-gradient(135deg, #00563b 0%, #007850 100%);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(0, 86, 59, 0.3);
+}
+
+.submitButton:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0, 86, 59, 0.4);
+}
+
+.submitButton:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* Table Card */
+.tableCard {
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    overflow: hidden;
+    animation: fadeInUp 0.6s ease-out;
+}
+
+.tableWrapper {
+    overflow-x: auto;
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.table thead {
+    background: linear-gradient(135deg, #00563b 0%, #007850 100%);
+}
+
+.table thead tr th {
+    padding: 1.25rem 1.5rem;
+    text-align: left;
+    font-size: 0.875rem;
+    font-weight: 700;
+    color: white;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.table tbody tr {
+    border-bottom: 1px solid #e5e7eb;
+    transition: background-color 0.2s ease;
+}
+
+.table tbody tr:hover {
+    background-color: #f9fafb;
+}
+
+.table tbody tr:last-child {
+    border-bottom: none;
+}
+
+.table tbody tr td {
+    padding: 1.25rem 1.5rem;
+    font-size: 0.9375rem;
+    color: #374151;
+}
+
+.emailText {
+    font-weight: 500;
+    color: #1f2937;
+}
+
+.dateText {
+    color: #6b7280;
+    font-size: 0.875rem;
+}
+
+/* Role Badges */
+.roleBadge {
+    display: inline-block;
+    padding: 0.375rem 0.875rem;
+    border-radius: 20px;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    text-transform: capitalize;
+}
+
+.roleAdmin {
+    background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+    color: #1e40af;
+}
+
+.roleSuperAdmin {
+    background: linear-gradient(135deg, #fce7f3 0%, #fbcfe8 100%);
+    color: #be185d;
+}
+
+.roleModerator {
+    background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+    color: #065f46;
+}
+
+/* Password Cell */
+.passwordCell {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.hash {
+    font-family: monospace;
+    font-size: 0.875rem;
+    color: #6b7280;
+}
+
+.toggleButton {
+    background: none;
+    border: none;
+    color: #6b7280;
+    font-size: 1.125rem;
+    cursor: pointer;
+    padding: 0.375rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+}
+
+.toggleButton:hover {
+    color: #00563b;
+    background: rgba(0, 86, 59, 0.1);
+}
+
+/* Edit Input */
+.editInput {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+.editInput input {
+    flex: 1;
+    padding: 0.5rem 0.75rem;
+    border: 2px solid #00563b;
+    border-radius: 6px;
+    font-size: 0.9375rem;
+}
+
+.saveButton,
+.cancelButton {
+    padding: 0.5rem 0.875rem;
+    border: none;
+    border-radius: 6px;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.saveButton {
+    background: #00563b;
+    color: white;
+}
+
+.saveButton:hover {
+    background: #007850;
+}
+
+.cancelButton {
+    background: #e5e7eb;
+    color: #374151;
+}
+
+.cancelButton:hover {
+    background: #d1d5db;
+}
+
+/* Action Buttons */
+.actionButtons {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.editButton {
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+    background: linear-gradient(135deg, #00563b 0%, #007850 100%);
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.editButton:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 86, 59, 0.3);
+}
+
+/* Loading State */
+.loadingContainer {
+    background: white;
+    border-radius: 16px;
+    padding: 4rem 2rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1.5rem;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+}
+
+.spinner {
+    width: 50px;
+    height: 50px;
+    border: 5px solid #e5e7eb;
+    border-top-color: #00563b;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+.loadingContainer p {
+    color: #6b7280;
+    font-size: 1.125rem;
+    font-weight: 500;
+}
+
+/* Empty State */
+.emptyState {
+    background: white;
+    border-radius: 16px;
+    padding: 4rem 2rem;
+    text-align: center;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+}
+
+.emptyIcon {
+    font-size: 4rem;
+    color: #d1d5db;
+    margin-bottom: 1.5rem;
+}
+
+.emptyState h3 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #1f2937;
+    margin: 0 0 0.5rem 0;
+}
+
+.emptyState p {
+    font-size: 1rem;
+    color: #6b7280;
+    margin: 0;
+}
+
+/* Animations */
+@keyframes slideDown {
+    from {
+        transform: translateY(-30px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes shake {
+    0%, 100% {
+        transform: translateX(0);
+    }
+    10%, 30%, 50%, 70%, 90% {
+        transform: translateX(-5px);
+    }
+    20%, 40%, 60%, 80% {
+        transform: translateX(5px);
+    }
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+    .headerContent,
+    .main {
+        padding: 1.5rem;
+    }
+
+    .formRow {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 768px) {
+    .actionBar {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .addButton {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .headerTitle {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .headerIcon {
+        font-size: 2.5rem;
+    }
+
+    .headerTitle h1 {
+        font-size: 1.75rem;
+    }
+
+    .tableWrapper {
+        overflow-x: scroll;
+    }
+
+    .table {
+        min-width: 800px;
+    }
+}
+
+@media (max-width: 640px) {
+    .formCard {
+        padding: 1.5rem;
+    }
+
+    .statCard {
+        padding: 1rem 1.25rem;
+    }
+
+    .table thead tr th,
+    .table tbody tr td {
+        padding: 1rem;
+        font-size: 0.875rem;
+    }
+}

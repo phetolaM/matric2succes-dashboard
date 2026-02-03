@@ -1,0 +1,593 @@
+/* Container */
+.container {
+    min-height: 100vh;
+    background: #f5f7fa;
+}
+
+/* Header */
+.header {
+    background: #00563b;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.headerContent {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.backButton {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: white;
+    padding: 0.625rem 1.25rem;
+    border-radius: 8px;
+    font-size: 0.9375rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    width: fit-content;
+}
+
+.backButton:hover {
+    background: rgba(255, 255, 255, 0.15);
+}
+
+.headerTitle {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    color: white;
+}
+
+.headerIcon {
+    font-size: 2.5rem;
+}
+
+.headerTitle h1 {
+    font-size: 2rem;
+    font-weight: 600;
+    margin: 0 0 0.25rem 0;
+}
+
+.headerTitle p {
+    font-size: 0.9375rem;
+    margin: 0;
+    opacity: 0.9;
+}
+
+/* Main Content */
+.main {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+/* Stats Card */
+.statsCard {
+    background: white;
+    border-radius: 8px;
+    padding: 1.5rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    border: 1px solid #e5e7eb;
+    transition: all 0.2s ease;
+}
+
+.statsCard:hover {
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    border-color: #00563b;
+}
+
+.statContent {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.statLabel {
+    font-size: 0.875rem;
+    color: #6b7280;
+    font-weight: 500;
+}
+
+.statValue {
+    font-size: 2rem;
+    font-weight: 600;
+    color: #1f2937;
+}
+
+.statIcon {
+    font-size: 2.5rem;
+    color: #00563b;
+    opacity: 0.2;
+}
+
+/* Emails Card */
+.emailsCard {
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    border: 1px solid #e5e7eb;
+}
+
+.emailsHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.5rem;
+    border-bottom: 1px solid #e5e7eb;
+    background: #f9fafb;
+}
+
+.emailsHeader h2 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #1f2937;
+    margin: 0;
+}
+
+.emailsCount {
+    font-size: 0.875rem;
+    color: #6b7280;
+    font-weight: 500;
+}
+
+.emailsList {
+    display: flex;
+    flex-direction: column;
+}
+
+/* Email Item */
+.emailItem {
+    padding: 1.25rem 1.5rem;
+    border-bottom: 1px solid #f3f4f6;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.emailItem:last-child {
+    border-bottom: none;
+}
+
+.emailItem:hover {
+    background: #fafafa;
+}
+
+.emailHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 0.75rem;
+}
+
+.emailSubject {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 1rem;
+    font-weight: 600;
+    color: #1f2937;
+}
+
+.emailIcon {
+    font-size: 1.125rem;
+    color: #00563b;
+    flex-shrink: 0;
+}
+
+.emailDate {
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+    font-size: 0.875rem;
+    color: #6b7280;
+    white-space: nowrap;
+}
+
+.dateIcon {
+    font-size: 0.875rem;
+}
+
+.emailDate small {
+    font-size: 0.75rem;
+    opacity: 0.8;
+}
+
+.emailMeta {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+}
+
+.emailFrom {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.9375rem;
+    color: #374151;
+}
+
+.emailFrom svg {
+    font-size: 0.875rem;
+    color: #6b7280;
+}
+
+.emailAddress {
+    font-size: 0.875rem;
+    color: #00563b;
+    font-weight: 500;
+}
+
+/* Empty State */
+.emptyState {
+    background: white;
+    border-radius: 8px;
+    padding: 4rem 2rem;
+    text-align: center;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    border: 1px solid #e5e7eb;
+}
+
+.emptyIcon {
+    font-size: 3.5rem;
+    color: #d1d5db;
+    margin-bottom: 1.5rem;
+}
+
+.emptyState h3 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #1f2937;
+    margin: 0 0 0.5rem 0;
+}
+
+.emptyState p {
+    font-size: 0.9375rem;
+    color: #6b7280;
+    margin: 0;
+}
+
+/* Loading State */
+.loadingContainer {
+    background: white;
+    border-radius: 8px;
+    padding: 4rem 2rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1.5rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    border: 1px solid #e5e7eb;
+    max-width: 1400px;
+    margin: 2rem auto;
+}
+
+.spinner {
+    width: 40px;
+    height: 40px;
+    border: 4px solid #e5e7eb;
+    border-top-color: #00563b;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+.loadingContainer p {
+    color: #6b7280;
+    font-size: 1rem;
+    font-weight: 500;
+}
+
+/* Error State */
+.errorContainer {
+    background: white;
+    border-radius: 8px;
+    padding: 2rem;
+    text-align: center;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    border: 1px solid #e5e7eb;
+    border-left: 4px solid #dc2626;
+    max-width: 1400px;
+    margin: 2rem auto;
+}
+
+.errorContainer p {
+    color: #dc2626;
+    font-weight: 500;
+    margin: 0 0 1rem 0;
+}
+
+.errorContainer button {
+    background: #00563b;
+    color: white;
+    border: none;
+    padding: 0.625rem 1.25rem;
+    border-radius: 6px;
+    font-size: 0.9375rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.errorContainer button:hover {
+    background: #004530;
+}
+
+/* Modal */
+.modalOverlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    padding: 1rem;
+}
+
+.modal {
+    background: white;
+    border-radius: 12px;
+    width: 100%;
+    max-width: 700px;
+    max-height: 90vh;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+}
+
+.modalHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.5rem;
+    border-bottom: 1px solid #e5e7eb;
+    flex-shrink: 0;
+}
+
+.modalHeader h3 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #1f2937;
+    margin: 0;
+    padding-right: 1rem;
+}
+
+.modalClose {
+    width: 32px;
+    height: 32px;
+    border-radius: 6px;
+    background: #f3f4f6;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 1.25rem;
+    color: #6b7280;
+    flex-shrink: 0;
+}
+
+.modalClose:hover {
+    background: #e5e7eb;
+    color: #1f2937;
+}
+
+.modalBody {
+    padding: 1.5rem;
+    overflow-y: auto;
+    flex: 1;
+}
+
+.modalMeta {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    padding: 1.25rem;
+    background: #f9fafb;
+    border-radius: 8px;
+    margin-bottom: 1.5rem;
+    border: 1px solid #e5e7eb;
+}
+
+.modalMetaItem {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    font-size: 0.9375rem;
+    color: #374151;
+}
+
+.modalMetaItem svg {
+    font-size: 1.125rem;
+    color: #00563b;
+    margin-top: 0.125rem;
+    flex-shrink: 0;
+}
+
+.modalMetaItem strong {
+    font-weight: 600;
+    color: #1f2937;
+    margin-right: 0.25rem;
+}
+
+.emailLink {
+    color: #00563b;
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.emailLink:hover {
+    text-decoration: underline;
+}
+
+.modalMessage {
+    margin-top: 1rem;
+}
+
+.modalMessage h4 {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #1f2937;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin: 0 0 0.75rem 0;
+}
+
+.modalMessage p {
+    font-size: 0.9375rem;
+    color: #374151;
+    line-height: 1.7;
+    margin: 0;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+}
+
+.modalFooter {
+    display: flex;
+    gap: 0.75rem;
+    padding: 1rem 1.5rem;
+    border-top: 1px solid #e5e7eb;
+    flex-shrink: 0;
+}
+
+.modalBackButton,
+.modalDeleteButton {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1rem;
+    border: none;
+    border-radius: 8px;
+    font-size: 0.9375rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.modalBackButton {
+    background: #f3f4f6;
+    color: #374151;
+}
+
+.modalBackButton:hover {
+    background: #e5e7eb;
+}
+
+.modalDeleteButton {
+    background: #dc2626;
+    color: white;
+}
+
+.modalDeleteButton:hover {
+    background: #b91c1c;
+}
+
+.modalDeleteButton:disabled,
+.modalBackButton:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Animations */
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .headerContent,
+    .main {
+        padding: 1.5rem;
+    }
+
+    .headerTitle {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .headerIcon {
+        font-size: 2rem;
+    }
+
+    .headerTitle h1 {
+        font-size: 1.5rem;
+    }
+
+    .emailHeader {
+        flex-direction: column;
+        gap: 0.5rem;
+        align-items: flex-start;
+    }
+
+    .emailDate {
+        margin-top: 0.25rem;
+    }
+
+    .emailMeta {
+        flex-direction: column;
+        gap: 0.5rem;
+        align-items: flex-start;
+    }
+
+    .modal {
+        max-width: 100%;
+        max-height: 95vh;
+        margin: 0;
+    }
+
+    .modalFooter {
+        flex-direction: column;
+    }
+
+    .modalMetaItem {
+        flex-direction: column;
+        gap: 0.375rem;
+    }
+
+    .modalMetaItem svg {
+        margin-top: 0;
+    }
+}
+
+@media (max-width: 640px) {
+    .statsCard {
+        padding: 1.25rem;
+    }
+
+    .statIcon {
+        font-size: 2rem;
+    }
+
+    .statValue {
+        font-size: 1.75rem;
+    }
+
+    .emailsHeader {
+        flex-direction: column;
+        gap: 0.75rem;
+        align-items: flex-start;
+    }
+
+    .emailItem {
+        padding: 1rem;
+    }
+}

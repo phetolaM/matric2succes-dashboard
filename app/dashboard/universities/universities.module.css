@@ -1,0 +1,712 @@
+.container {
+    min-height: 100vh;
+    background: linear-gradient(135deg, #f8fafb 0%, #e8f4f0 100%);
+}
+
+/* Header */
+.header {
+    background: linear-gradient(135deg, #00563b 0%, #007850 100%);
+    box-shadow: 0 4px 20px rgba(0, 86, 59, 0.15);
+    padding: 1.5rem 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 2rem;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+.backButton {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: rgba(255, 255, 255, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: white;
+    padding: 0.7rem 1.2rem;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.95rem;
+    transition: all 0.3s ease;
+    white-space: nowrap;
+}
+
+.backButton:hover {
+    background: rgba(255, 255, 255, 0.3);
+    border-color: rgba(255, 255, 255, 0.5);
+}
+
+.titleContainer {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex: 1;
+}
+
+.titleIcon {
+    font-size: 2rem;
+    color: white;
+}
+
+.titleContainer h2 {
+    color: white;
+    margin: 0;
+    font-size: 1.75rem;
+    font-weight: 700;
+}
+
+.headerActions {
+    display: flex;
+    gap: 1rem;
+}
+
+.refreshButton {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: rgba(255, 255, 255, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: white;
+    padding: 0.7rem 1.2rem;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.95rem;
+    transition: all 0.3s ease;
+    white-space: nowrap;
+}
+
+.refreshButton:hover:not(:disabled) {
+    background: rgba(255, 255, 255, 0.3);
+    border-color: rgba(255, 255, 255, 0.5);
+}
+
+.refreshButton:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.addButton {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: white;
+    color: #00563b;
+    border: none;
+    padding: 0.7rem 1.5rem;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.95rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    text-decoration: none;
+}
+
+.addButton:hover {
+    background: #f0f0f0;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 86, 59, 0.2);
+}
+
+.spin {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Error Message */
+.errorMessage {
+    background: #ffebee;
+    color: #d32f2f;
+    padding: 1rem 2rem;
+    margin: 1rem 2rem;
+    border-radius: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    box-shadow: 0 2px 8px rgba(211, 47, 47, 0.2);
+}
+
+.errorMessage button {
+    background: #d32f2f;
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.errorMessage button:hover {
+    background: #b71c1c;
+}
+
+/* Search Bar */
+.searchBar {
+    position: relative;
+    margin: 2rem;
+    max-width: 500px;
+}
+
+.searchIcon {
+    position: absolute;
+    left: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #9ca3af;
+    font-size: 1.25rem;
+}
+
+.searchBar input {
+    width: 100%;
+    padding: 0.75rem 1rem 0.75rem 2.75rem;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    transition: all 0.3s ease;
+    background: white;
+}
+
+.searchBar input:focus {
+    outline: none;
+    border-color: #00563b;
+    box-shadow: 0 0 0 3px rgba(0, 86, 59, 0.1);
+}
+
+/* Stats Bar */
+.statsBar {
+    padding: 0 2rem 1.5rem;
+    display: flex;
+    gap: 1.5rem;
+}
+
+.stat {
+    background: white;
+    padding: 1rem 1.5rem;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.statIcon {
+    font-size: 1.5rem;
+    color: #00563b;
+}
+
+/* Loading Container */
+.loadingContainer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 400px;
+    gap: 1rem;
+    color: #666;
+}
+
+.spinner {
+    width: 40px;
+    height: 40px;
+    border: 4px solid #f3f3f3;
+    border-top: 4px solid #00563b;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+/* Empty State */
+.emptyState {
+    background: white;
+    padding: 3rem 2rem;
+    border-radius: 12px;
+    text-align: center;
+    margin: 2rem;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+}
+
+.emptyIcon {
+    font-size: 3.5rem;
+    color: #d1d5db;
+    margin-bottom: 1rem;
+}
+
+.emptyState h3 {
+    color: #1f2937;
+    margin: 0 0 0.5rem 0;
+    font-size: 1.5rem;
+}
+
+.emptyState p {
+    color: #6b7280;
+    margin: 0 0 1.5rem 0;
+}
+
+.primaryButton {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: #00563b;
+    color: white;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    cursor: pointer;
+    text-decoration: none;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.primaryButton:hover {
+    background: #004d31;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 86, 59, 0.3);
+}
+
+/* University Grid */
+.universityGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 2rem;
+    padding: 0 2rem 2rem;
+}
+
+.universityCard {
+    background: white;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+    transition: all 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.universityCard:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 12px 30px rgba(0, 86, 59, 0.15);
+}
+
+.universityImage {
+    width: 100%;
+    height: 200px;
+    background: #f3f4f6;
+    overflow: hidden;
+}
+
+.universityImage img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+}
+
+.universityCard:hover .universityImage img {
+    transform: scale(1.05);
+}
+
+.universityContent {
+    padding: 1.5rem;
+    flex: 1;
+}
+
+.universityContent h3 {
+    color: #1f2937;
+    margin: 0 0 0.5rem 0;
+    font-size: 1.25rem;
+    font-weight: 700;
+    line-height: 1.4;
+}
+
+.subtitle {
+    color: #6b7280;
+    font-size: 0.9rem;
+    margin: 0 0 1rem 0;
+}
+
+.detail {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    color: #4b5563;
+    font-size: 0.9rem;
+    margin-bottom: 0.75rem;
+}
+
+.detailIcon {
+    color: #00563b;
+    flex-shrink: 0;
+}
+
+.badge {
+    display: inline-block;
+    background: #dbeafe;
+    color: #0c4a6e;
+    padding: 0.375rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    margin-top: 1rem;
+}
+
+.badgeOpen {
+    display: inline-block;
+    background: #dcfce7;
+    color: #166534;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    margin-top: 1rem;
+    border: 1px solid #86efac;
+}
+
+.badgeClosed {
+    display: inline-block;
+    background: #fee2e2;
+    color: #991b1b;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    margin-top: 1rem;
+    border: 1px solid #fca5a5;
+}
+
+.actions {
+    display: flex;
+    gap: 0.5rem;
+    padding: 1rem 1.5rem;
+    border-top: 1px solid #e5e7eb;
+}
+
+.editButton,
+.deleteButton {
+    flex: 1;
+    padding: 0.6rem;
+    border: 1px solid #e5e7eb;
+    border-radius: 6px;
+    background: white;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+}
+
+.editButton {
+    color: #00563b;
+    border-color: #00563b;
+}
+
+.editButton:hover {
+    background: #f0fdf9;
+}
+
+.deleteButton {
+    color: #dc2626;
+    border-color: #dc2626;
+}
+
+.deleteButton:hover:not(:disabled) {
+    background: #fee2e2;
+}
+
+.deleteButton:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* Form Styles */
+.formContainer {
+    min-height: 100vh;
+    background: linear-gradient(135deg, #f8fafb 0%, #e8f4f0 100%);
+    padding: 2rem;
+}
+
+.formHeader {
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+    margin-bottom: 2rem;
+}
+
+.formHeader h2 {
+    color: #1f2937;
+    margin: 0;
+    font-size: 1.75rem;
+    font-weight: 700;
+}
+
+.form {
+    background: white;
+    border-radius: 12px;
+    padding: 2rem;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+    max-width: 800px;
+}
+
+.formSection {
+    margin-bottom: 2rem;
+    padding-bottom: 2rem;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.formSection:last-of-type {
+    border-bottom: none;
+    margin-bottom: 0;
+    padding-bottom: 0;
+}
+
+.formSection h3 {
+    color: #1f2937;
+    margin: 0 0 1.5rem 0;
+    font-size: 1.1rem;
+    font-weight: 600;
+}
+
+.sectionHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+}
+
+.sectionHeader h3 {
+    margin: 0;
+}
+
+.addItemButton {
+    background: #00563b;
+    color: white;
+    border: none;
+    padding: 0.6rem 1rem;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: all 0.3s ease;
+}
+
+.addItemButton:hover {
+    background: #004d31;
+}
+
+.formGroup {
+    margin-bottom: 1.5rem;
+}
+
+.formGroup label {
+    display: block;
+    color: #374151;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    font-size: 0.95rem;
+}
+
+.formGroup input,
+.formGroup textarea {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    font-family: inherit;
+    transition: all 0.3s ease;
+}
+
+.helperText {
+    margin-top: 0.5rem;
+    color: #6b7280;
+    font-size: 0.9rem;
+}
+
+.helperTextSmall {
+    margin-top: 0.35rem;
+    color: #9ca3af;
+    font-size: 0.8rem;
+    word-break: break-all;
+}
+
+.errorInline {
+    margin-top: 0.35rem;
+    color: #b91c1c;
+    font-size: 0.9rem;
+}
+
+.imagePreviewWrapper {
+    margin-top: 0.75rem;
+}
+
+.imagePreview {
+    width: 100%;
+    max-height: 240px;
+    object-fit: cover;
+    border-radius: 8px;
+    border: 1px solid #e5e7eb;
+}
+
+.formGroup input:focus,
+.formGroup textarea:focus {
+    outline: none;
+    border-color: #00563b;
+    box-shadow: 0 0 0 3px rgba(0, 86, 59, 0.1);
+}
+
+.formGroup input[type="checkbox"] {
+    width: auto;
+    margin-right: 0.5rem;
+    cursor: pointer;
+}
+
+.formGroup label input[type="checkbox"] {
+    display: inline-block;
+}
+
+.arrayItem {
+    background: #f9fafb;
+    padding: 1.5rem;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+    border: 1px solid #e5e7eb;
+}
+
+.removeItemButton {
+    background: #fee2e2;
+    color: #dc2626;
+    border: 1px solid #dc2626;
+    padding: 0.6rem 1rem;
+    border-radius: 6px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: all 0.3s ease;
+    width: 100%;
+    justify-content: center;
+    margin-top: 1rem;
+}
+
+.removeItemButton:hover {
+    background: #dc2626;
+    color: white;
+}
+
+.formActions {
+    display: flex;
+    gap: 1rem;
+    margin-top: 2rem;
+    padding-top: 2rem;
+    border-top: 1px solid #e5e7eb;
+}
+
+.cancelButton,
+.submitButton {
+    flex: 1;
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    border: none;
+}
+
+.cancelButton {
+    background: #f3f4f6;
+    color: #6b7280;
+}
+
+.cancelButton:hover {
+    background: #e5e7eb;
+}
+
+.submitButton {
+    background: #00563b;
+    color: white;
+}
+
+.submitButton:hover:not(:disabled) {
+    background: #004d31;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 86, 59, 0.3);
+}
+
+.submitButton:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+
+    .titleContainer {
+        width: 100%;
+    }
+
+    .headerActions {
+        width: 100%;
+    }
+
+    .refreshButton,
+    .addButton {
+        flex: 1;
+        justify-content: center;
+    }
+
+    .universityGrid {
+        grid-template-columns: 1fr;
+        padding: 0 1rem 1rem;
+    }
+
+    .searchBar {
+        margin: 1rem;
+        max-width: none;
+    }
+
+    .form {
+        padding: 1.5rem;
+    }
+
+    .formHeader {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .formHeader h2 {
+        font-size: 1.35rem;
+    }
+
+    .statsBar {
+        flex-direction: column;
+        padding: 0 1rem 1rem;
+    }
+
+    .stat {
+        width: 100%;
+    }
+}

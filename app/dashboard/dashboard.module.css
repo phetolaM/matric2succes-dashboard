@@ -1,0 +1,188 @@
+.container {
+  min-height: 100vh;
+  background-color: #f4f7f6; /* Light grey-green tint for a professional look */
+  font-family: 'Inter', -apple-system, sans-serif;
+  color: #333;
+}
+
+/* Header Styles */
+.header {
+  background-color: #00563b;
+  color: white;
+  padding: 1rem 2rem;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.headerContent {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.headerTitle {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin: 0;
+  letter-spacing: -0.5px;
+}
+
+.headerSubtitle {
+  font-size: 0.8rem;
+  opacity: 0.8;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.logoutButton {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.logoutButton:hover {
+  background: #c0392b;
+  border-color: #c0392b;
+}
+
+/* Main Content */
+.main {
+  max-width: 1200px;
+  margin: 2rem auto;
+  padding: 0 2rem;
+  animation: fadeIn 0.8s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.welcomeSection {
+  margin-bottom: 2.5rem;
+}
+
+.welcomeTitle {
+  font-size: 1.8rem;
+  color: #1a1a1a;
+  margin-bottom: 0.5rem;
+}
+
+.welcomeText {
+  color: #666;
+}
+
+/* Grid Layout */
+.cardsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1.5rem;
+  padding-bottom: 3rem;
+}
+
+/* Individual Card Styles */
+.card {
+  background: white;
+  padding: 1.5rem;
+  border-radius: 12px;
+  border: 1px solid #e0e0e0;
+  cursor: pointer;
+  position: relative;
+  transition: all 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 20px rgba(0, 86, 59, 0.1);
+  border-color: #00563b;
+}
+
+.cardIcon {
+  font-size: 1.5rem;
+  width: 45px;
+  height: 45px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  margin-bottom: 1.2rem;
+  position: relative;
+  background: #f0fdf4; /* Very light green */
+  color: #00563b;
+}
+
+/* Card Specific Colors (Optional) */
+/* You can style specific icons differently if you want, 
+   but keeping them consistent with your theme is more professional */
+.adminUsers, .courseCollection, .apsVisibility, .subjects, 
+.universities, .newsletter, .userListDetails, .userManagement, .emailInbox {
+  color: #00563b;
+  background: rgba(0, 86, 59, 0.1);
+}
+
+.cardTitle {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  color: #1a1a1a;
+}
+
+.cardDescription {
+  font-size: 0.9rem;
+  color: #666;
+  line-height: 1.4;
+  margin-bottom: 1rem;
+}
+
+.cardArrow {
+  margin-top: auto;
+  font-size: 1.2rem;
+  color: #00563b;
+  opacity: 0;
+  transition: all 0.3s ease;
+  transform: translateX(-10px);
+}
+
+.card:hover .cardArrow {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+/* Badge for Email Inbox */
+.badge {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  background: #e11d48;
+  color: white;
+  font-size: 0.7rem;
+  font-weight: 700;
+  min-width: 18px;
+  height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  border: 2px solid white;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .headerContent { flex-direction: column; gap: 1rem; text-align: center; }
+  .cardsGrid { grid-template-columns: 1fr; }
+  .main { padding: 0 1rem; }
+}

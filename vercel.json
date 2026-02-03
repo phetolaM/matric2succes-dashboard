@@ -1,0 +1,30 @@
+{
+    "buildCommand": "npm run build",
+    "devCommand": "npm run dev",
+    "installCommand": "npm install",
+    "framework": "nextjs",
+    "regions": ["lhr1"],
+    "env": [
+        "MONGODB_URI",
+        "MONGODB_ADMIN_DB",
+        "MONGODB_EMAIL_DB",
+        "MONGODB_NEWSLETTER_DB",
+        "MONGODB_UNIVERSITY_DB",
+        "NEXT_PUBLIC_SUPABASE_URL",
+        "NEXT_PUBLIC_SUPABASE_ANON_KEY",
+        "JWT_SECRET",
+        "SMTP_HOST",
+        "SMTP_PORT",
+        "SMTP_USER",
+        "SMTP_PASS"
+    ],
+    "buildOutputDirectory": ".next",
+    "cleanUrls": true,
+    "trailingSlash": false,
+    "rewrites": [
+        {
+            "source": "/api/:path*",
+            "destination": "/api/:path*"
+        }
+    ]
+}

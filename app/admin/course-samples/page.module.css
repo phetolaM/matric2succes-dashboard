@@ -1,0 +1,76 @@
+.container {
+    min-height: 100vh;
+    background: #f9fafb;
+    padding: 2rem;
+}
+
+.layout {
+    display: grid;
+    grid-template-columns: 200px 1fr;
+    gap: 2rem;
+    margin-top: 1rem;
+    max-width: 1200px;
+}
+
+.sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    background: white;
+    padding: 1rem;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    height: fit-content;
+}
+
+.tab {
+    padding: 0.75rem 1rem;
+    border: 1px solid #e5e7eb;
+    background: white;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-align: left;
+    font-weight: 600;
+}
+
+.tab:hover {
+    background: #f3f4f6;
+    border-color: #d1d5db;
+}
+
+.activeTab {
+    background: #0b4330;
+    color: white;
+    border-color: #0b4330;
+}
+
+.content {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.content h2 {
+    margin: 0 0 1rem 0;
+    color: #0b4330;
+}
+
+.json {
+    background: #1e293b;
+    color: #e2e8f0;
+    padding: 1rem;
+    border-radius: 8px;
+    overflow-x: auto;
+    font-size: 0.85rem;
+    line-height: 1.5;
+}
+
+.error {
+    color: #dc2626;
+    background: #fee2e2;
+    padding: 1rem;
+    border-radius: 8px;
+    border: 1px solid #fca5a5;
+}
