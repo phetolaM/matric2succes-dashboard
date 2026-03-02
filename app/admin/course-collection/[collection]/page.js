@@ -21,6 +21,7 @@ const UNIVERSITIES_WITH_FORMS = [
     "wsu",
     "unisa",
     "nmu",
+    "up",
     "mut",
     "smu",
     "tut",

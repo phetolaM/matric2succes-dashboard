@@ -10,6 +10,7 @@ import {
     FiSettings,
     FiBell,
     FiToggleLeft,
+    FiClipboard,
 } from "react-icons/fi";
 import { MdAttachEmail } from "react-icons/md";
 import { ImBooks } from "react-icons/im";
@@ -136,6 +137,14 @@ export default function AdminDashboard() {
             route: "/dashboard/email-inbox",
             colorClass: "emailInbox",
             badge: emailCount,
+        },
+        {
+            id: "application-assistance",
+            title: "Application Assistance",
+            description: "Manage paid client applications",
+            icon: FiClipboard,
+            route: "/dashboard/application-assistance",
+            colorClass: "applicationAssistance",
         },
     ];
 

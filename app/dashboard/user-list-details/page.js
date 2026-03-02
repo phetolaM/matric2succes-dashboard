@@ -48,6 +48,42 @@ export default function UserListDetails() {
         fetchUsers();
     }, []);
 
+    const getLocationSearchValues = (user) => {
+        const values = [
+            user?.country,
+            user?.province,
+            user?.city,
+            user?.location,
+            user?.locationData?.country,
+            user?.locationData?.country_name,
+            user?.locationData?.region,
+            user?.locationData?.region_name,
+            user?.locationData?.province,
+            user?.locationData?.state,
+            user?.locationData?.city,
+            user?.locationData?.town,
+            user?.locationData?.district,
+        ]
+            .filter((value) => typeof value === "string" && value.trim())
+            .map((value) => value.trim());
+
+        return Array.from(new Set(values));
+    };
+
+    const getUserPrimaryIp = (user) => {
+        if (user?.ipAddress) return String(user.ipAddress);
+        if (!Array.isArray(user?.visits)) return null;
+
+        for (let i = user.visits.length - 1; i >= 0; i -= 1) {
+            const visit = user.visits[i];
+            if (visit && typeof visit === "object" && visit.ip) {
+                return String(visit.ip);
+            }
+        }
+
+        return null;
+    };
+
     const fetchUsers = async () => {
         try {
             setIsRefreshing(true);
@@ -75,7 +111,7 @@ export default function UserListDetails() {
                         u.scheduled &&
                         !u.emailSent &&
                         u.scheduledAt &&
-                        new Date(u.scheduledAt) <= new Date()
+                        new Date(u.scheduledAt) <= new Date(),
                 );
                 if (hasDue) {
                     const res = await fetch("/api/scheduled-emails/process", {
@@ -84,7 +120,10 @@ export default function UserListDetails() {
                     if (res.ok) {
                         const data = await res.json();
                         if (data.succeeded > 0) {
-                            console.log("Auto-processed scheduled emails:", data);
+                            console.log(
+                                "Auto-processed scheduled emails:",
+                                data,
+                            );
                             await fetchUsers(); // Refresh to show updated status
                         }
                     }
@@ -108,28 +147,35 @@ export default function UserListDetails() {
 
         if (searchTerm) {
             const term = searchTerm.toLowerCase();
-            result = result.filter((user) =>
-                user.name?.toLowerCase().includes(term) ||
-                user.email?.toLowerCase().includes(term)
+            result = result.filter(
+                (user) =>
+                    user.name?.toLowerCase().includes(term) ||
+                    user.email?.toLowerCase().includes(term),
             );
         }
 
         if (locationSearch) {
             const locationTerm = locationSearch.toLowerCase();
-            result = result.filter((user) =>
-                user.province?.toLowerCase().includes(locationTerm) ||
-                user.country?.toLowerCase().includes(locationTerm) ||
-                user.city?.toLowerCase().includes(locationTerm) ||
-                (user.locationData && JSON.stringify(user.locationData).toLowerCase().includes(locationTerm))
+            result = result.filter(
+                (user) =>
+                    getLocationSearchValues(user).some((value) =>
+                        value.toLowerCase().includes(locationTerm),
+                    ) ||
+                    (user.locationData &&
+                        JSON.stringify(user.locationData)
+                            .toLowerCase()
+                            .includes(locationTerm)),
             );
         }
 
         if (searchDate) {
             result = result.filter((user) =>
                 user.visits?.some((visit) => {
-                    if (typeof visit === 'object' && visit.date) {
-                        return new Date(visit.date).toLocaleDateString() ===
-                            new Date(searchDate).toLocaleDateString();
+                    if (typeof visit === "object" && visit.date) {
+                        return (
+                            new Date(visit.date).toLocaleDateString() ===
+                            new Date(searchDate).toLocaleDateString()
+                        );
                     }
                     return false;
                 }),
@@ -142,19 +188,19 @@ export default function UserListDetails() {
     // Sort by most recent visit
     const sortedUsers = [...filteredUsers].sort((a, b) => {
         const modifier = sortDirection === "asc" ? 1 : -1;
-        
+
         const getLatestVisitDate = (user) => {
             if (!user.visits || user.visits.length === 0) return new Date(0);
-            
+
             // Handle both object and string formats
             const latestVisit = user.visits[0]; // Assuming visits are already sorted newest first
             const date = latestVisit.date || latestVisit;
             return new Date(date);
         };
-        
+
         const aDate = getLatestVisitDate(a);
         const bDate = getLatestVisitDate(b);
-        
+
         return (aDate - bDate) * modifier;
     });
 
@@ -315,7 +361,7 @@ export default function UserListDetails() {
                             </button>
                         )}
                     </div>
-                    
+
                     <div className={styles.searchGroup}>
                         <FiMapPin className={styles.searchIcon} />
                         <input
@@ -442,7 +488,7 @@ export default function UserListDetails() {
                                             </div>
                                         </th>
                                         <th>Actions</th>
-                                         <th>
+                                        <th>
                                             <div className={styles.thContent}>
                                                 <FiClock />
                                                 <span>Email Status</span>
@@ -484,68 +530,242 @@ export default function UserListDetails() {
                                                 </a>
                                             </td>
                                             <td>
-                                                <div className={styles.locationCell}>
-                                                    {user.country && (
-                                                        <div className={styles.locationItem}>
-                                                            <FiGlobe className={styles.locationIcon} />
-                                                            <span className={styles.locationText}>
-                                                                {user.country}
-                                                                {user.province && `, ${user.province}`}
-                                                                {user.city && `, ${user.city}`}
-                                                            </span>
-                                                        </div>
-                                                    )}
-                                                    {user.locationData && (
-                                                        <div className={styles.locationDetails}>
-                                                            <small>
-                                                                {user.locationData.region && `${user.locationData.region}, `}
-                                                                {user.locationData.city && `${user.locationData.city}, `}
-                                                                {user.locationData.country}
-                                                            </small>
-                                                        </div>
-                                                    )}
-                                                    {!user.country && !user.locationData && (
-                                                        <span className={styles.noLocation}>
-                                                            Location not available
-                                                        </span>
-                                                    )}
+                                                <div
+                                                    className={
+                                                        styles.locationCell
+                                                    }
+                                                >
+                                                    {(() => {
+                                                        const locationValues =
+                                                            getLocationSearchValues(
+                                                                user,
+                                                            );
+                                                        const fallbackIp =
+                                                            getUserPrimaryIp(
+                                                                user,
+                                                            );
+
+                                                        return (
+                                                            <>
+                                                                {getLocationSearchValues(
+                                                                    user,
+                                                                ).length >
+                                                                    0 && (
+                                                                    <div
+                                                                        className={
+                                                                            styles.locationItem
+                                                                        }
+                                                                    >
+                                                                        <FiGlobe
+                                                                            className={
+                                                                                styles.locationIcon
+                                                                            }
+                                                                        />
+                                                                        <span
+                                                                            className={
+                                                                                styles.locationText
+                                                                            }
+                                                                        >
+                                                                            {[
+                                                                                user.country,
+                                                                                user.province,
+                                                                                user.city,
+                                                                            ]
+                                                                                .filter(
+                                                                                    Boolean,
+                                                                                )
+                                                                                .join(
+                                                                                    ", ",
+                                                                                ) ||
+                                                                                getLocationSearchValues(
+                                                                                    user,
+                                                                                )
+                                                                                    .slice(
+                                                                                        0,
+                                                                                        3,
+                                                                                    )
+                                                                                    .join(
+                                                                                        ", ",
+                                                                                    )}
+                                                                        </span>
+                                                                    </div>
+                                                                )}
+                                                                {user.locationData && (
+                                                                    <div
+                                                                        className={
+                                                                            styles.locationDetails
+                                                                        }
+                                                                    >
+                                                                        <small>
+                                                                            {[
+                                                                                user
+                                                                                    .locationData
+                                                                                    .region ||
+                                                                                    user
+                                                                                        .locationData
+                                                                                        .region_name,
+                                                                                user
+                                                                                    .locationData
+                                                                                    .city ||
+                                                                                    user
+                                                                                        .locationData
+                                                                                        .town ||
+                                                                                    user
+                                                                                        .locationData
+                                                                                        .district,
+                                                                                user
+                                                                                    .locationData
+                                                                                    .country ||
+                                                                                    user
+                                                                                        .locationData
+                                                                                        .country_name,
+                                                                            ]
+                                                                                .filter(
+                                                                                    Boolean,
+                                                                                )
+                                                                                .join(
+                                                                                    ", ",
+                                                                                )}
+                                                                        </small>
+                                                                    </div>
+                                                                )}
+                                                                {locationValues.length ===
+                                                                    0 &&
+                                                                    !user.locationData &&
+                                                                    fallbackIp && (
+                                                                        <div
+                                                                            className={
+                                                                                styles.locationItem
+                                                                            }
+                                                                        >
+                                                                            <FiGlobe
+                                                                                className={
+                                                                                    styles.locationIcon
+                                                                                }
+                                                                            />
+                                                                            <span
+                                                                                className={
+                                                                                    styles.locationText
+                                                                                }
+                                                                            >
+                                                                                IP:{" "}
+                                                                                {
+                                                                                    fallbackIp
+                                                                                }
+                                                                            </span>
+                                                                        </div>
+                                                                    )}
+                                                                {locationValues.length ===
+                                                                    0 &&
+                                                                    !user.locationData &&
+                                                                    !fallbackIp && (
+                                                                        <span
+                                                                            className={
+                                                                                styles.noLocation
+                                                                            }
+                                                                        >
+                                                                            Location
+                                                                            not
+                                                                            available
+                                                                        </span>
+                                                                    )}
+                                                            </>
+                                                        );
+                                                    })()}
                                                 </div>
                                             </td>
                                             <td>
-                                                <div className={styles.visitsContainer}>
+                                                <div
+                                                    className={
+                                                        styles.visitsContainer
+                                                    }
+                                                >
                                                     {user.visits?.length > 0 ? (
                                                         // Sort visits by date (newest first)
                                                         [...user.visits]
                                                             .sort((a, b) => {
-                                                                const dateA = new Date(a.date || a);
-                                                                const dateB = new Date(b.date || b);
-                                                                return dateB - dateA;
-                                                            })
-                                                            .map((visit, idx) => {
-                                                                const visitDate = visit.date || visit;
-                                                                const ipAddress = visit.ip || user.ipAddress;
-                                                                
+                                                                const dateA =
+                                                                    new Date(
+                                                                        a.date ||
+                                                                            a,
+                                                                    );
+                                                                const dateB =
+                                                                    new Date(
+                                                                        b.date ||
+                                                                            b,
+                                                                    );
                                                                 return (
-                                                                    <div key={idx} className={styles.visitItem}>
-                                                                        <div className={styles.visitHeader}>
-                                                                            {/* {idx === 0 && (
-                                                                                <span className={styles.latestBadge}>Latest</span>
-                                                                            )} */}
-                                                                            <span className={styles.visitDate}>
-                                                                                {new Date(visitDate).toLocaleString()}
-                                                                            </span>
-                                                                        </div>
-                                                                        {ipAddress && (
-                                                                            <div className={styles.visitIp}>
-                                                                                <FiGlobe className={styles.ipIcon} />
-                                                                                <span>{ipAddress}</span>
-                                                                            </div>
-                                                                        )}
-                                                                    </div>
+                                                                    dateB -
+                                                                    dateA
                                                                 );
                                                             })
+                                                            .map(
+                                                                (
+                                                                    visit,
+                                                                    idx,
+                                                                ) => {
+                                                                    const visitDate =
+                                                                        visit.date ||
+                                                                        visit;
+                                                                    const ipAddress =
+                                                                        visit.ip ||
+                                                                        user.ipAddress;
+
+                                                                    return (
+                                                                        <div
+                                                                            key={
+                                                                                idx
+                                                                            }
+                                                                            className={
+                                                                                styles.visitItem
+                                                                            }
+                                                                        >
+                                                                            <div
+                                                                                className={
+                                                                                    styles.visitHeader
+                                                                                }
+                                                                            >
+                                                                                {/* {idx === 0 && (
+                                                                                <span className={styles.latestBadge}>Latest</span>
+                                                                            )} */}
+                                                                                <span
+                                                                                    className={
+                                                                                        styles.visitDate
+                                                                                    }
+                                                                                >
+                                                                                    {new Date(
+                                                                                        visitDate,
+                                                                                    ).toLocaleString()}
+                                                                                </span>
+                                                                            </div>
+                                                                            {ipAddress && (
+                                                                                <div
+                                                                                    className={
+                                                                                        styles.visitIp
+                                                                                    }
+                                                                                >
+                                                                                    <FiGlobe
+                                                                                        className={
+                                                                                            styles.ipIcon
+                                                                                        }
+                                                                                    />
+                                                                                    <span>
+                                                                                        {
+                                                                                            ipAddress
+                                                                                        }
+                                                                                    </span>
+                                                                                </div>
+                                                                            )}
+                                                                        </div>
+                                                                    );
+                                                                },
+                                                            )
                                                     ) : (
-                                                        <span className={styles.noData}>
+                                                        <span
+                                                            className={
+                                                                styles.noData
+                                                            }
+                                                        >
                                                             No visit data
                                                         </span>
                                                     )}
@@ -627,7 +847,7 @@ export default function UserListDetails() {
                                                     </div>
                                                 )}
                                             </td>
-                                            
+
                                             <td>
                                                 <div
                                                     className={
