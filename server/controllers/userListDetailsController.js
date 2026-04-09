@@ -1,6 +1,135 @@
 import UserList from "../models/userListModel.js";
+import UserListCounter, {
+    USER_LIST_BASELINE_COUNT,
+    USER_LIST_COUNTER_KEY,
+} from "../models/userListCounterModel.js";
 import { sendCustomEmail } from "../services/mailgunClient.js";
 import { sendNodemailerEmail } from "../services/nodemailerClient.js";
+import { isIP } from "node:net";
+
+function normalizeIpAddress(rawIp) {
+    if (!rawIp) return null;
+
+    let ip = rawIp;
+    if (Array.isArray(ip)) ip = ip[0];
+    if (typeof ip === "object") ip = JSON.stringify(ip);
+
+    ip = String(ip)
+        .replace(/\[|\]|"/g, "")
+        .trim();
+
+    if (!ip) return null;
+
+    if (ip.includes(",")) {
+        ip = ip.split(",")[0].trim();
+    }
+
+    if (ip.startsWith("::ffff:")) {
+        ip = ip.replace("::ffff:", "");
+    }
+
+    if (/^\d+\.\d+\.\d+\.\d+:\d+$/.test(ip)) {
+        ip = ip.split(":")[0];
+    }
+
+    return ip || null;
+}
+
+function isPublicIpAddress(ipAddress) {
+    const ip = normalizeIpAddress(ipAddress);
+    if (!ip) return false;
+
+    const ipVersion = isIP(ip);
+    if (!ipVersion) return false;
+
+    if (ipVersion === 4) {
+        if (ip === "127.0.0.1") return false;
+        if (ip.startsWith("10.")) return false;
+        if (ip.startsWith("192.168.")) return false;
+        if (ip.startsWith("169.254.")) return false;
+        if (ip.startsWith("0.")) return false;
+
+        if (ip.startsWith("172.")) {
+            const secondOctet = Number(ip.split(".")[1]);
+            if (secondOctet >= 16 && secondOctet <= 31) return false;
+        }
+
+        return true;
+    }
+
+    const lowerIp = ip.toLowerCase();
+    if (lowerIp === "::1") return false;
+    if (lowerIp === "::") return false;
+    if (lowerIp.startsWith("fe80:")) return false;
+    if (lowerIp.startsWith("fc") || lowerIp.startsWith("fd")) return false;
+    if (lowerIp.startsWith("2001:db8:")) return false;
+
+    return true;
+}
+
+function hasRealLocation(realLocation) {
+    if (!realLocation || typeof realLocation !== "object") return false;
+    return Boolean(
+        String(realLocation.country || "").trim() ||
+        String(realLocation.province || "").trim() ||
+        String(realLocation.city || "").trim(),
+    );
+}
+
+function getRequestIp(req) {
+    const forwarded = req.headers["x-forwarded-for"];
+    const realIp = req.headers["x-real-ip"];
+    return normalizeIpAddress(
+        forwarded || realIp || req.ip || req.body?.ipAddress,
+    );
+}
+
+async function convertIpToRealLocation(ipAddress) {
+    const ip = normalizeIpAddress(ipAddress);
+    if (!isPublicIpAddress(ip)) {
+        return null;
+    }
+
+    try {
+        const primary = await fetch(`https://ipapi.co/${ip}/json/`, {
+            headers: { Accept: "application/json" },
+            signal: AbortSignal.timeout(5000),
+        });
+
+        if (primary.ok) {
+            const data = await primary.json();
+            const location = {
+                country: data?.country_name || null,
+                province: data?.region || null,
+                city: data?.city || data?.town || null,
+            };
+            if (hasRealLocation(location)) return location;
+        }
+    } catch (err) {
+        // try fallback provider
+    }
+
+    try {
+        const fallback = await fetch(`https://ipwho.is/${ip}`, {
+            headers: { Accept: "application/json" },
+            signal: AbortSignal.timeout(5000),
+        });
+
+        if (fallback.ok) {
+            const data = await fallback.json();
+            const location = {
+                country: data?.country || data?.country_name || null,
+                province: data?.region || data?.region_name || null,
+                city: data?.city || data?.town || null,
+            };
+            if (hasRealLocation(location)) return location;
+        }
+    } catch (err) {
+        // no-op, return empty location
+    }
+
+    return null;
+}
 
 export const saveApsUser = async (req, res) => {
     try {
@@ -11,6 +140,7 @@ export const saveApsUser = async (req, res) => {
                 .json({ message: "Name and email are required" });
         }
         const now = new Date();
+        const requestIp = getRequestIp(req);
 
         // Normalize email to lowercase for consistent lookups
         const normalizedEmail = String(email).trim().toLowerCase();
@@ -19,12 +149,26 @@ export const saveApsUser = async (req, res) => {
         let user = await UserList.findOne({ email: normalizedEmail });
 
         if (user) {
+            const visitIp = requestIp || user.ipAddress || null;
+            const visitEntry = {
+                date: now,
+                ip: visitIp,
+                ipAddress: visitIp,
+            };
+
             // Existing user: log today's visit if not already
-            const alreadyLogged = user.visits.some(
-                (visit) => new Date(visit).toDateString() === now.toDateString()
-            );
+            const alreadyLogged = user.visits.some((visit) => {
+                const value = visit?.date || visit;
+                const visitDate = new Date(value);
+                if (Number.isNaN(visitDate.getTime())) return false;
+                return visitDate.toDateString() === now.toDateString();
+            });
             if (!alreadyLogged) {
-                user.visits.push(now);
+                user.visits.push(visitEntry);
+            }
+
+            if (!user.ipAddress && requestIp) {
+                user.ipAddress = requestIp;
             }
 
             // If email hasn't been sent yet, send immediately (one-off)
@@ -33,14 +177,14 @@ export const saveApsUser = async (req, res) => {
                     // send immediately using Mailgun (existing behavior)
                     await sendCustomEmail(
                         normalizedEmail,
-                        normalizedName || "User"
+                        normalizedName || "User",
                     );
                     user.emailSent = true;
                     user.emailSentAt = new Date();
                 } catch (err) {
                     console.error(
                         "Failed to send immediate Mailgun email:",
-                        err
+                        err,
                     );
                     // don't fail the whole request if sending fails
                 }
@@ -48,16 +192,44 @@ export const saveApsUser = async (req, res) => {
 
             await user.save();
         } else {
+            const currentCount = await UserList.countDocuments();
+
+            await UserListCounter.updateOne(
+                { key: USER_LIST_COUNTER_KEY },
+                {
+                    $setOnInsert: {
+                        value: Math.max(USER_LIST_BASELINE_COUNT, currentCount),
+                    },
+                },
+                { upsert: true },
+            );
+
+            const counter = await UserListCounter.findOneAndUpdate(
+                { key: USER_LIST_COUNTER_KEY },
+                { $inc: { value: 1 } },
+                { new: true },
+            );
+
             // New user: create and persist a one-off email schedule in 10 minutes.
             // A separate DB-backed scheduler will pick up due records and send them.
             const scheduledAt = new Date(now.getTime() + 10 * 60 * 1000);
+            const firstIp = requestIp || null;
+            const resolvedLocation = firstIp
+                ? await convertIpToRealLocation(firstIp)
+                : null;
+
             user = new UserList({
+                userNumber: counter?.value,
                 name: normalizedName,
                 email: normalizedEmail,
-                visits: [now],
+                ipAddress: firstIp,
+                visits: [{ date: now, ip: firstIp, ipAddress: firstIp }],
                 scheduled: true,
                 scheduledAt,
             });
+            if (resolvedLocation) {
+                user.realLocation = resolvedLocation;
+            }
             await user.save();
         }
 
@@ -94,7 +266,7 @@ export const sendNowUser = async (req, res) => {
         } catch (err) {
             console.error(
                 "sendNowUser encountered an error sending with Nodemailer:",
-                err?.message || err
+                err?.message || err,
             );
             // fallback to Mailgun if transporter missing or nodemailer failed
             try {
@@ -102,12 +274,9 @@ export const sendNowUser = async (req, res) => {
                 console.log("Fallback: sent email via Mailgun for", user.email);
             } catch (mgErr) {
                 console.error("Fallback Mailgun send failed:", mgErr);
-                return res
-                    .status(500)
-                    .json({
-                        message:
-                            "Failed to send email via Nodemailer and Mailgun",
-                    });
+                return res.status(500).json({
+                    message: "Failed to send email via Nodemailer and Mailgun",
+                });
             }
         }
 

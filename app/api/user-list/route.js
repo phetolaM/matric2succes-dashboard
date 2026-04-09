@@ -5,7 +5,6 @@ import { DATABASES } from "../../../lib/db/databases";
 import { getUserListModel } from "../../../lib/models/userList";
 
 export const runtime = "nodejs";
-const GEO_LOOKUP_RETRY_MS = 24 * 60 * 60 * 1000;
 
 function normalizeIpAddress(rawIp) {
     if (!rawIp) return null;
@@ -67,18 +66,24 @@ function isPublicIpAddress(ipAddress) {
     return true;
 }
 
-function extractUserIp(user) {
+function hasRealLocation(realLocation) {
+    if (!realLocation || typeof realLocation !== "object") return false;
+    return Boolean(
+        String(realLocation.country || "").trim() ||
+        String(realLocation.province || "").trim() ||
+        String(realLocation.city || "").trim(),
+    );
+}
+
+function getStableIp(user) {
     const directIp = normalizeIpAddress(user?.ipAddress);
     if (directIp) return directIp;
 
-    if (!Array.isArray(user?.visits) || user.visits.length === 0) {
-        return null;
-    }
+    if (!Array.isArray(user?.visits)) return null;
 
-    for (let i = user.visits.length - 1; i >= 0; i -= 1) {
-        const visit = user.visits[i];
+    for (const visit of user.visits) {
         const visitIp = normalizeIpAddress(
-            typeof visit === "object" ? visit?.ip : null,
+            typeof visit === "object" ? visit?.ip || visit?.ipAddress : null,
         );
         if (visitIp) return visitIp;
     }
@@ -86,167 +91,232 @@ function extractUserIp(user) {
     return null;
 }
 
-function shouldLookupLocation(user, lookupIp) {
-    if (!lookupIp || !isPublicIpAddress(lookupIp)) return false;
-    if (user?.country || user?.province) return false;
-
-    const lastLookupAt = user?.geoLookupAt
-        ? new Date(user.geoLookupAt).getTime()
-        : 0;
-
-    if (!lastLookupAt) return true;
-
-    return Date.now() - lastLookupAt > GEO_LOOKUP_RETRY_MS;
+function sleep(ms) {
+    return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-async function fetchLocationFromIpapi(ipAddress) {
-    ipAddress = normalizeIpAddress(ipAddress);
-    if (!ipAddress || !isPublicIpAddress(ipAddress)) {
-        return { province: null, country: null, countryCode: null };
+async function fetchWithRetry(url, maxRetries = 3, initialDelayMs = 1000) {
+    for (let attempt = 0; attempt < maxRetries; attempt++) {
+        try {
+            const response = await fetch(url, {
+                headers: { Accept: "application/json" },
+                cache: "no-store",
+                signal: AbortSignal.timeout(8000),
+            });
+
+            if (response.ok) {
+                return response;
+            }
+
+            if (response.status === 429 && attempt < maxRetries - 1) {
+                const delayMs = initialDelayMs * Math.pow(2, attempt);
+                console.log(
+                    `[Geo] Rate limited (429), waiting ${delayMs}ms before retry...`,
+                );
+                await sleep(delayMs);
+                continue;
+            }
+
+            return response;
+        } catch (err) {
+            if (attempt < maxRetries - 1) {
+                const delayMs = initialDelayMs * Math.pow(2, attempt);
+                console.log(
+                    `[Geo] Request failed: ${err.message}, waiting ${delayMs}ms before retry...`,
+                );
+                await sleep(delayMs);
+            } else {
+                throw err;
+            }
+        }
+    }
+}
+
+async function convertIpToRealLocation(ipAddress) {
+    const ip = normalizeIpAddress(ipAddress);
+    if (!isPublicIpAddress(ip)) {
+        console.log(
+            `[Geo] IP ${ipAddress} is not public, skipping geolocation`,
+        );
+        return null;
     }
 
     try {
-        // Try ipapi.co first
-        const resp = await fetch(`https://ipapi.co/${ipAddress}/json/`, {
-            headers: { Accept: "application/json" },
-            cache: "no-store",
-            signal: AbortSignal.timeout(5000),
-        });
-        if (resp.ok) {
-            const data = await resp.json();
-            return {
-                province: data?.region || null,
+        console.log(`[Geo] Fetching from ipapi for ${ip}...`);
+        const IPAPI_KEY =
+            process.env.IPAPI_KEY || "5e86896517e2ae32d47ea1965cd713f6";
+        const response = await fetchWithRetry(
+            `https://api.ipapi.com/api/${ip}?access_key=${IPAPI_KEY}`,
+        );
+
+        if (response.ok) {
+            const data = await response.json();
+            console.log(`[Geo] ipapi response for ${ip}:`, data);
+            const location = {
                 country: data?.country_name || null,
-                countryCode: data?.country || null,
+                province: data?.region_name || data?.region || null,
+                city: data?.city || data?.town || null,
             };
+            if (hasRealLocation(location)) {
+                console.log(`[Geo] Valid location from ipapi:`, location);
+                return location;
+            } else {
+                console.log(`[Geo] ipapi returned empty location for ${ip}`);
+            }
+        } else {
+            console.log(
+                `[Geo] ipapi returned status ${response.status} for ${ip}`,
+            );
         }
-
-        // Fallback: ipwho.is
-        const fallback = await fetch(`https://ipwho.is/${ipAddress}`, {
-            headers: { Accept: "application/json" },
-            cache: "no-store",
-            signal: AbortSignal.timeout(5000),
-        });
-        if (fallback.ok) {
-            const fbData = await fallback.json();
-            return {
-                province: fbData.region || fbData.region_name || null,
-                country: fbData.country || fbData.country_name || null,
-                countryCode: fbData.country_code || null,
-            };
-        }
-
-        return { province: null, country: null, countryCode: null };
     } catch (err) {
-        return { province: null, country: null, countryCode: null };
+        console.log(`[Geo] ipapi failed for ${ip}:`, err.message);
     }
+
+    console.log(
+        `[Geo] ipapi lookup failed for ${ip}, will retry on next page load`,
+    );
+    return null;
 }
 
 export async function GET() {
     try {
+        console.log("[User List] GET request started");
         const conn = await getDbConnection(DATABASES.USER_LIST);
         const UserList = getUserListModel(conn);
 
         const users = await UserList.find({}).lean();
+        console.log(`[User List] Fetched ${users.length} users from DB`);
 
-        // Create cache to avoid repeating lookups
         const locationCache = new Map();
-        const lookupUsers = users.map((user) => {
-            const lookupIp = extractUserIp(user);
-            return {
-                user,
-                lookupIp,
-                shouldLookup: shouldLookupLocation(user, lookupIp),
-            };
-        });
-
-        const ipsToLookup = Array.from(
-            new Set(
-                lookupUsers
-                    .filter((entry) => entry.shouldLookup)
-                    .map((entry) => entry.lookupIp),
-            ),
-        );
-
-        await Promise.all(
-            ipsToLookup.map(async (ip) => {
-                const location = await fetchLocationFromIpapi(ip);
-                locationCache.set(ip, location);
-            }),
-        );
-
         const bulkUpdates = [];
+        const hydratedUsers = [];
 
-        for (const { user, lookupIp, shouldLookup } of lookupUsers) {
-            const cachedLocation = lookupIp
-                ? locationCache.get(lookupIp)
-                : null;
-            const resolvedIp = user.ipAddress || lookupIp || null;
-            const resolvedProvince =
-                user.province || cachedLocation?.province || null;
-            const resolvedCountry =
-                user.country || cachedLocation?.country || null;
-            const resolvedCountryCode =
-                user.countryCode || cachedLocation?.countryCode || null;
+        for (const user of users) {
+            const stableIp = getStableIp(user);
+            const hasLocation = hasRealLocation(user.realLocation);
+            const isStableIpPublic = isPublicIpAddress(stableIp);
 
-            const setPayload = {};
+            console.log(
+                `[User List] User: ${user.email}, stableIp: ${stableIp}, hasLocation: ${hasLocation}, realLocation:`,
+                user.realLocation,
+            );
 
-            if (resolvedIp && user.ipAddress !== resolvedIp) {
-                setPayload.ipAddress = resolvedIp;
-            }
-            if (resolvedProvince && user.province !== resolvedProvince) {
-                setPayload.province = resolvedProvince;
-            }
-            if (resolvedCountry && user.country !== resolvedCountry) {
-                setPayload.country = resolvedCountry;
-            }
-            if (
-                resolvedCountryCode &&
-                user.countryCode !== resolvedCountryCode
-            ) {
-                setPayload.countryCode = resolvedCountryCode;
-            }
-            if (shouldLookup) {
-                setPayload.geoLookupAt = new Date();
-            }
+            let resolvedLocation = hasLocation ? user.realLocation : null;
 
-            if (Object.keys(setPayload).length > 0) {
+            if (!hasLocation && stableIp && isStableIpPublic) {
+                console.log(
+                    `[User List] Attempting conversion for ${user.email}`,
+                );
+                let lookedUp = locationCache.get(stableIp);
+                if (lookedUp === undefined) {
+                    console.log(
+                        `[User List] Cache miss for ${stableIp}, calling API`,
+                    );
+                    lookedUp = await convertIpToRealLocation(stableIp);
+                    locationCache.set(stableIp, lookedUp);
+                    console.log(
+                        `[User List] Conversion result: ${stableIp} =>`,
+                        lookedUp,
+                    );
+                } else {
+                    console.log(
+                        `[User List] Cache hit for ${stableIp}:`,
+                        lookedUp,
+                    );
+                }
+
+                if (lookedUp) {
+                    resolvedLocation = lookedUp;
+                    console.log(
+                        `[User List] Adding bulk update for ${user.email} with location`,
+                        lookedUp,
+                    );
+                    bulkUpdates.push({
+                        updateOne: {
+                            filter: { _id: user._id },
+                            update: {
+                                $set: {
+                                    ...(user.ipAddress
+                                        ? {}
+                                        : { ipAddress: stableIp }),
+                                    realLocation: lookedUp,
+                                },
+                            },
+                        },
+                    });
+                } else if (!user.ipAddress) {
+                    console.log(
+                        `[User List] Conversion failed, saving IP for ${user.email}`,
+                    );
+                    bulkUpdates.push({
+                        updateOne: {
+                            filter: { _id: user._id },
+                            update: { $set: { ipAddress: stableIp } },
+                        },
+                    });
+                } else {
+                    console.log(
+                        `[User List] Conversion failed, user already has IP, no action for ${user.email}`,
+                    );
+                }
+            } else if (!hasLocation && stableIp && !isStableIpPublic) {
+                console.log(
+                    `[User List] Skipping conversion for non-public IP ${stableIp} (${user.email})`,
+                );
+
+                if (!user.ipAddress) {
+                    bulkUpdates.push({
+                        updateOne: {
+                            filter: { _id: user._id },
+                            update: { $set: { ipAddress: stableIp } },
+                        },
+                    });
+                }
+            } else if (!user.ipAddress && stableIp) {
+                console.log(
+                    `[User List] User ${user.email} has location but missing IP, saving IP`,
+                );
                 bulkUpdates.push({
                     updateOne: {
                         filter: { _id: user._id },
-                        update: { $set: setPayload },
+                        update: { $set: { ipAddress: stableIp } },
                     },
                 });
             }
+
+            hydratedUsers.push({
+                ...user,
+                ipAddress: user.ipAddress || stableIp || null,
+                ...(resolvedLocation ? { realLocation: resolvedLocation } : {}),
+            });
         }
+
+        console.log(`[User List] Prepared ${bulkUpdates.length} bulk updates`);
 
         if (bulkUpdates.length > 0) {
             try {
-                await UserList.bulkWrite(bulkUpdates, { ordered: false });
+                const result = await UserList.bulkWrite(bulkUpdates, {
+                    ordered: false,
+                });
+                console.log("[User List] BulkWrite result:", {
+                    insertedCount: result.insertedCount,
+                    modifiedCount: result.modifiedCount,
+                    upsertedCount: result.upsertedCount,
+                });
             } catch (writeErr) {
-                console.error("User location persistence error:", writeErr);
+                console.error(
+                    "[User List] Error in bulkWrite:",
+                    writeErr.message || writeErr,
+                );
             }
         }
 
-        const withProvince = users.map((user) => {
-            const lookupIp = extractUserIp(user);
-            const cachedLocation = lookupIp
-                ? locationCache.get(lookupIp)
-                : null;
-
-            return {
-                ...user,
-                ipAddress: user.ipAddress || lookupIp || null,
-                province: user.province || cachedLocation?.province || null,
-                country: user.country || cachedLocation?.country || null,
-                countryCode:
-                    user.countryCode || cachedLocation?.countryCode || null,
-            };
-        });
-
-        return NextResponse.json(withProvince, { status: 200 });
+        console.log(
+            `[User List] Returning ${hydratedUsers.length} hydrated users`,
+        );
+        return NextResponse.json(hydratedUsers, { status: 200 });
     } catch (err) {
-        console.error("Fetch users error:", err);
+        console.error("[User List] Fetch users error:", err);
         return NextResponse.json(
             { error: "Failed to fetch users" },
             { status: 500 },

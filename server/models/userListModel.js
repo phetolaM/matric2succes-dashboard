@@ -3,9 +3,22 @@ import mongoose from "mongoose";
 import { userListDbConnection } from "../config/userListDB/userListDB.js";
 
 const userListSchema = new mongoose.Schema({
+    userNumber: { type: Number, index: true, sparse: true },
     name: { type: String, required: true },
     email: { type: String, required: true },
-    visits: [{ type: Date, required: true }], // Array of visit dates
+    ipAddress: { type: String, default: null },
+    realLocation: {
+        country: { type: String },
+        province: { type: String },
+        city: { type: String },
+    },
+    visits: [
+        {
+            date: { type: Date },
+            ip: { type: String, default: null },
+            ipAddress: { type: String, default: null },
+        },
+    ],
     // Email-related fields to support one-off sending & scheduling
     emailSent: { type: Boolean, default: false },
     emailSentAt: { type: Date, default: null },
@@ -21,7 +34,7 @@ const userListSchema = new mongoose.Schema({
 const UserList = userListDbConnection.model(
     "UserListDetail",
     userListSchema,
-    "UserListDetails"
+    "UserListDetails",
 );
 
 export default UserList;

@@ -24,6 +24,7 @@ import {
 export default function UserListDetails() {
     const router = useRouter();
     const [users, setUsers] = useState([]);
+    const [historicalTotal, setHistoricalTotal] = useState(0);
     const [filteredUsers, setFilteredUsers] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -50,19 +51,14 @@ export default function UserListDetails() {
 
     const getLocationSearchValues = (user) => {
         const values = [
+            user?.realLocation?.country,
+            user?.realLocation?.province,
+            user?.realLocation?.city,
             user?.country,
+            user?.countryCode,
             user?.province,
             user?.city,
             user?.location,
-            user?.locationData?.country,
-            user?.locationData?.country_name,
-            user?.locationData?.region,
-            user?.locationData?.region_name,
-            user?.locationData?.province,
-            user?.locationData?.state,
-            user?.locationData?.city,
-            user?.locationData?.town,
-            user?.locationData?.district,
         ]
             .filter((value) => typeof value === "string" && value.trim())
             .map((value) => value.trim());
@@ -88,11 +84,23 @@ export default function UserListDetails() {
         try {
             setIsRefreshing(true);
             setError(null);
-            const res = await fetch("/api/user-list");
-            if (!res.ok) throw new Error("Failed to fetch users");
-            const data = await res.json();
+            const [usersRes, totalRes] = await Promise.all([
+                fetch("/api/user-list"),
+                fetch("/api/user-list/total"),
+            ]);
+
+            if (!usersRes.ok) throw new Error("Failed to fetch users");
+
+            const data = await usersRes.json();
             setUsers(data);
             setFilteredUsers(data);
+
+            if (totalRes.ok) {
+                const totalData = await totalRes.json();
+                setHistoricalTotal(Number(totalData?.historicalTotal || 0));
+            } else {
+                setHistoricalTotal(data.length);
+            }
         } catch (err) {
             console.error("Failed to fetch users:", err);
             setError("Failed to load users. Please try again.");
@@ -156,15 +164,10 @@ export default function UserListDetails() {
 
         if (locationSearch) {
             const locationTerm = locationSearch.toLowerCase();
-            result = result.filter(
-                (user) =>
-                    getLocationSearchValues(user).some((value) =>
-                        value.toLowerCase().includes(locationTerm),
-                    ) ||
-                    (user.locationData &&
-                        JSON.stringify(user.locationData)
-                            .toLowerCase()
-                            .includes(locationTerm)),
+            result = result.filter((user) =>
+                getLocationSearchValues(user).some((value) =>
+                    value.toLowerCase().includes(locationTerm),
+                ),
             );
         }
 
@@ -301,7 +304,7 @@ export default function UserListDetails() {
                                 Total Users
                             </span>
                             <span className={styles.statValue}>
-                                {users.length}
+                                {historicalTotal}
                             </span>
                         </div>
                         <FiUsers className={styles.statIcon} />
@@ -540,10 +543,6 @@ export default function UserListDetails() {
                                                             getLocationSearchValues(
                                                                 user,
                                                             );
-                                                        const fallbackIp =
-                                                            getUserPrimaryIp(
-                                                                user,
-                                                            );
 
                                                         return (
                                                             <>
@@ -567,6 +566,16 @@ export default function UserListDetails() {
                                                                             }
                                                                         >
                                                                             {[
+                                                                                user
+                                                                                    ?.realLocation
+                                                                                    ?.country,
+                                                                                user
+                                                                                    ?.realLocation
+                                                                                    ?.province,
+                                                                                user
+                                                                                    ?.realLocation
+                                                                                    ?.city,
+                                                                                user.location,
                                                                                 user.country,
                                                                                 user.province,
                                                                                 user.city,
@@ -590,85 +599,18 @@ export default function UserListDetails() {
                                                                         </span>
                                                                     </div>
                                                                 )}
-                                                                {user.locationData && (
-                                                                    <div
+                                                                {locationValues.length ===
+                                                                    0 && (
+                                                                    <span
                                                                         className={
-                                                                            styles.locationDetails
+                                                                            styles.noLocation
                                                                         }
                                                                     >
-                                                                        <small>
-                                                                            {[
-                                                                                user
-                                                                                    .locationData
-                                                                                    .region ||
-                                                                                    user
-                                                                                        .locationData
-                                                                                        .region_name,
-                                                                                user
-                                                                                    .locationData
-                                                                                    .city ||
-                                                                                    user
-                                                                                        .locationData
-                                                                                        .town ||
-                                                                                    user
-                                                                                        .locationData
-                                                                                        .district,
-                                                                                user
-                                                                                    .locationData
-                                                                                    .country ||
-                                                                                    user
-                                                                                        .locationData
-                                                                                        .country_name,
-                                                                            ]
-                                                                                .filter(
-                                                                                    Boolean,
-                                                                                )
-                                                                                .join(
-                                                                                    ", ",
-                                                                                )}
-                                                                        </small>
-                                                                    </div>
+                                                                        Location
+                                                                        not
+                                                                        available
+                                                                    </span>
                                                                 )}
-                                                                {locationValues.length ===
-                                                                    0 &&
-                                                                    !user.locationData &&
-                                                                    fallbackIp && (
-                                                                        <div
-                                                                            className={
-                                                                                styles.locationItem
-                                                                            }
-                                                                        >
-                                                                            <FiGlobe
-                                                                                className={
-                                                                                    styles.locationIcon
-                                                                                }
-                                                                            />
-                                                                            <span
-                                                                                className={
-                                                                                    styles.locationText
-                                                                                }
-                                                                            >
-                                                                                IP:{" "}
-                                                                                {
-                                                                                    fallbackIp
-                                                                                }
-                                                                            </span>
-                                                                        </div>
-                                                                    )}
-                                                                {locationValues.length ===
-                                                                    0 &&
-                                                                    !user.locationData &&
-                                                                    !fallbackIp && (
-                                                                        <span
-                                                                            className={
-                                                                                styles.noLocation
-                                                                            }
-                                                                        >
-                                                                            Location
-                                                                            not
-                                                                            available
-                                                                        </span>
-                                                                    )}
                                                             </>
                                                         );
                                                     })()}
