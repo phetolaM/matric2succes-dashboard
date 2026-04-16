@@ -21,6 +21,7 @@ const UNIVERSITIES_WITH_FORMS = [
     "wsu",
     "unisa",
     "nmu",
+    "ufs",
     "up",
     "mut",
     "smu",
@@ -249,15 +250,19 @@ export default function CourseCollectionDetailPage() {
                             </div>
                         )}
 
-                        {(collection.toLowerCase() === "nmu"
+                        {(["nmu", "ufs"].includes(collection.toLowerCase())
                             ? course.faculty
                             : course.majoring) && (
                             <p className={styles.subtext}>
-                                {collection.toLowerCase() === "nmu"
+                                {["nmu", "ufs"].includes(
+                                    collection.toLowerCase(),
+                                )
                                     ? "Faculty"
                                     : "Major"}
                                 :{" "}
-                                {collection.toLowerCase() === "nmu"
+                                {["nmu", "ufs"].includes(
+                                    collection.toLowerCase(),
+                                )
                                     ? course.faculty
                                     : course.majoring}
                             </p>

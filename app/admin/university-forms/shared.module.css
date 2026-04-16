@@ -1,8 +1,8 @@
 /* Editorial-inspired course editing interface */
 
-@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,600;0,9..144,700;1,9..144,300&family=DM_Sans:wght@400;500;700&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,600;0,9..144,700;1,9..144,300&family=DM_Sans:wght@400;500;700&display=swap");
 
-:root {
+.container {
     --color-ink: #0a0a0a;
     --color-paper: #fefdfb;
     --color-accent: #d73a49;
@@ -12,14 +12,14 @@
     --color-success: #28a745;
     --color-error-bg: #fff5f5;
     --color-error-border: #feb2b2;
-    
-    --font-display: 'Fraunces', serif;
-    --font-body: 'DM Sans', -apple-system, sans-serif;
-    
+
+    --font-display: "Fraunces", serif;
+    --font-body: "DM Sans", -apple-system, sans-serif;
+
     --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.03);
     --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.06);
     --shadow-lg: 0 10px 40px rgba(0, 0, 0, 0.1);
-    
+
     --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     --transition-spring: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
@@ -39,7 +39,7 @@
     left: 0;
     right: 0;
     height: 40vh;
-    background: 
+    background:
         linear-gradient(135deg, rgba(215, 58, 73, 0.03) 0%, transparent 60%),
         repeating-linear-gradient(
             45deg,
@@ -90,7 +90,7 @@
 }
 
 .backButton::after {
-    content: '';
+    content: "";
     position: absolute;
     bottom: 0;
     left: 0;
@@ -141,7 +141,7 @@
     line-height: 1.1;
     color: var(--color-ink);
     margin: 0;
-    font-variation-settings: 'opsz' 144;
+    font-variation-settings: "opsz" 144;
 }
 
 /* Loading State */
@@ -322,16 +322,16 @@
     .container {
         padding: 1.5rem 1rem;
     }
-    
+
     .title {
         font-size: 2.5rem;
     }
-    
+
     .formWrapper {
         padding: 2rem 1.5rem;
         border-radius: 6px;
     }
-    
+
     .headerContent {
         padding: 1.5rem 0;
     }
@@ -341,17 +341,17 @@
     .title {
         font-size: 2rem;
     }
-    
+
     .formWrapper {
         padding: 1.5rem 1rem;
     }
-    
+
     .errorIcon {
         width: 56px;
         height: 56px;
         font-size: 1.5rem;
     }
-    
+
     .errorText {
         font-size: 1.25rem;
     }
@@ -369,11 +369,11 @@
     .backButton {
         display: none;
     }
-    
+
     .container {
         background: white;
     }
-    
+
     .formWrapper {
         box-shadow: none;
         border: 1px solid var(--color-border);
