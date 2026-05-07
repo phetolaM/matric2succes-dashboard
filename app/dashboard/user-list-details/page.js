@@ -544,12 +544,58 @@ export default function UserListDetails() {
                                                                 user,
                                                             );
 
+                                                        // Format location: city, province, country (lowercase)
+                                                        const formatLocation =
+                                                            () => {
+                                                                const city =
+                                                                    user
+                                                                        ?.realLocation
+                                                                        ?.city ||
+                                                                    user?.city;
+                                                                const province =
+                                                                    user
+                                                                        ?.realLocation
+                                                                        ?.province ||
+                                                                    user?.province;
+                                                                const country =
+                                                                    user
+                                                                        ?.realLocation
+                                                                        ?.country ||
+                                                                    user?.country;
+
+                                                                const parts = [
+                                                                    city,
+                                                                    province,
+                                                                    country,
+                                                                ]
+                                                                    .filter(
+                                                                        Boolean,
+                                                                    )
+                                                                    .map(
+                                                                        (
+                                                                            part,
+                                                                        ) =>
+                                                                            part.toUpperCase(),
+                                                                    );
+
+                                                                return parts.length >
+                                                                    0
+                                                                    ? parts.join(
+                                                                          ", ",
+                                                                      )
+                                                                    : null;
+                                                            };
+
+                                                        const formattedLocation =
+                                                            formatLocation();
+                                                        const ipAddress =
+                                                            getUserPrimaryIp(
+                                                                user,
+                                                            );
+
                                                         return (
                                                             <>
-                                                                {getLocationSearchValues(
-                                                                    user,
-                                                                ).length >
-                                                                    0 && (
+                                                                {formattedLocation && (
                                                                     <div
                                                                         className={
                                                                             styles.locationItem
@@ -565,52 +611,47 @@ export default function UserListDetails() {
                                                                                 styles.locationText
                                                                             }
                                                                         >
-                                                                            {[
-                                                                                user
-                                                                                    ?.realLocation
-                                                                                    ?.country,
-                                                                                user
-                                                                                    ?.realLocation
-                                                                                    ?.province,
-                                                                                user
-                                                                                    ?.realLocation
-                                                                                    ?.city,
-                                                                                user.location,
-                                                                                user.country,
-                                                                                user.province,
-                                                                                user.city,
-                                                                            ]
-                                                                                .filter(
-                                                                                    Boolean,
-                                                                                )
-                                                                                .join(
-                                                                                    ", ",
-                                                                                ) ||
-                                                                                getLocationSearchValues(
-                                                                                    user,
-                                                                                )
-                                                                                    .slice(
-                                                                                        0,
-                                                                                        3,
-                                                                                    )
-                                                                                    .join(
-                                                                                        ", ",
-                                                                                    )}
+                                                                            {
+                                                                                formattedLocation
+                                                                            }
                                                                         </span>
                                                                     </div>
                                                                 )}
-                                                                {locationValues.length ===
-                                                                    0 && (
-                                                                    <span
-                                                                        className={
-                                                                            styles.noLocation
-                                                                        }
-                                                                    >
-                                                                        Location
-                                                                        not
-                                                                        available
-                                                                    </span>
-                                                                )}
+                                                                {!formattedLocation &&
+                                                                    ipAddress && (
+                                                                        <div
+                                                                            className={
+                                                                                styles.locationItem
+                                                                            }
+                                                                        >
+                                                                            <FiGlobe
+                                                                                className={
+                                                                                    styles.locationIcon
+                                                                                }
+                                                                            />
+                                                                            <span
+                                                                                className={
+                                                                                    styles.locationText
+                                                                                }
+                                                                            >
+                                                                                {
+                                                                                    ipAddress
+                                                                                }
+                                                                            </span>
+                                                                        </div>
+                                                                    )}
+                                                                {!formattedLocation &&
+                                                                    !ipAddress && (
+                                                                        <span
+                                                                            className={
+                                                                                styles.noLocation
+                                                                            }
+                                                                        >
+                                                                            Location
+                                                                            not
+                                                                            available
+                                                                        </span>
+                                                                    )}
                                                             </>
                                                         );
                                                     })()}

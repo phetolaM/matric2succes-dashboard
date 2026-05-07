@@ -11,6 +11,10 @@
     --green-mid:     rgba(0, 86, 59, 0.14);
     --orange:        #ea580c;
     --red:           #b91c1c;
+    --blue:          #1d4ed8;
+    --blue-light:    rgba(29, 78, 216, 0.08);
+    --amber:         #b45309;
+    --amber-light:   rgba(180, 83, 9, 0.08);
     --indigo:        #6366f1;
     --ink:           #0f172a;
     --ink-soft:      #475569;
@@ -195,11 +199,11 @@
 
 .statsRow {
     display: grid;
-    grid-template-columns: repeat(6, 1fr);
+    grid-template-columns: repeat(5, 1fr);
     gap: 12px;
 }
 
-@media (max-width: 1200px) { .statsRow { grid-template-columns: repeat(3, 1fr); } }
+@media (max-width: 1100px) { .statsRow { grid-template-columns: repeat(3, 1fr); } }
 @media (max-width: 640px)  { .statsRow { grid-template-columns: repeat(2, 1fr); } }
 
 .statCard {
@@ -244,6 +248,67 @@
     color: var(--ink);
     line-height: 1;
     letter-spacing: -0.02em;
+}
+
+.statValueSmall {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--ink);
+    line-height: 1;
+    letter-spacing: -0.02em;
+}
+
+/* ─────────────────────────────────────────────────
+   URGENT ALERT BANNER — unapplied unis
+───────────────────────────────────────────────── */
+
+.urgentBanner {
+    background: #fffbeb;
+    border: 1px solid #fde68a;
+    border-radius: var(--radius-lg);
+    padding: 14px 18px;
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    animation: slideDown 0.25s ease;
+}
+
+.urgentBannerIcon {
+    color: #b45309;
+    font-size: 1.1rem;
+    margin-top: 1px;
+    flex-shrink: 0;
+}
+
+.urgentBannerTitle {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: #92400e;
+    margin: 0 0 4px;
+}
+
+.urgentBannerBody {
+    font-size: 0.78rem;
+    color: #b45309;
+    margin: 0;
+    line-height: 1.5;
+}
+
+.urgentBannerItems {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 8px;
+}
+
+.urgentBannerItem {
+    background: #fef3c7;
+    border: 1px solid #fde68a;
+    border-radius: 50px;
+    padding: 3px 12px;
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: #92400e;
 }
 
 /* ─────────────────────────────────────────────────
@@ -476,6 +541,21 @@
     text-overflow: ellipsis;
 }
 
+/* Unapplied warning badge on client row */
+.unappliedWarning {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    background: #fffbeb;
+    border: 1px solid #fde68a;
+    border-radius: 50px;
+    padding: 2px 10px;
+    font-size: 0.67rem;
+    font-weight: 700;
+    color: #92400e;
+    margin-top: 4px;
+}
+
 .clientRowMid {
     display: flex;
     flex-direction: column;
@@ -587,10 +667,12 @@
     letter-spacing: 0.02em;
 }
 
-.pillDone     { background: var(--green-light); color: var(--green); }
-.pillPending  { background: rgba(234,88,12,0.09); color: var(--orange); }
-.pillDefault  { background: var(--bg-subtle); color: #64748b; }
-.pillRejected { background: rgba(185,28,28,0.08); color: var(--red); }
+.pillDone       { background: var(--green-light); color: var(--green); }
+.pillPending    { background: rgba(234,88,12,0.09); color: var(--orange); }
+.pillDefault    { background: var(--bg-subtle); color: #64748b; }
+.pillRejected   { background: rgba(185,28,28,0.08); color: var(--red); }
+.pillAccepted   { background: var(--green-light); color: var(--green); }
+.pillNotApplied { background: rgba(180,83,9,0.08); color: var(--amber); }
 
 /* ─────────────────────────────────────────────────
    OVERLAY
@@ -630,7 +712,7 @@
     background: var(--card);
     border-radius: var(--radius-xl);
     width: 100%;
-    max-width: 980px;
+    max-width: 1040px;
     max-height: calc(100vh - 56px);
     display: flex;
     flex-direction: column;
@@ -732,6 +814,7 @@
     border-bottom: 1px solid var(--border);
     padding: 0 30px;
     flex-shrink: 0;
+    overflow-x: auto;
 }
 
 .infoStripItem {
@@ -739,6 +822,7 @@
     flex-direction: column;
     gap: 2px;
     padding: 12px 0;
+    flex-shrink: 0;
 }
 
 .infoStripDivider {
@@ -795,7 +879,7 @@
 }
 
 /* Progress buttons */
-.progressBtns { display: flex; gap: 8px; }
+.progressBtns { display: flex; gap: 8px; flex-wrap: wrap; }
 
 .progressOptBtn {
     padding: 9px 22px;
@@ -822,6 +906,30 @@
     color: #fff;
     box-shadow: 0 2px 8px rgba(0,86,59,0.22);
 }
+
+/* ── Notes field ── */
+.notesTextarea {
+    width: 100%;
+    padding: 10px 14px;
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius);
+    font-size: 0.85rem;
+    color: var(--ink);
+    background: var(--card);
+    outline: none;
+    box-sizing: border-box;
+    transition: border-color var(--transition), box-shadow var(--transition);
+    font-family: inherit;
+    resize: vertical;
+    min-height: 72px;
+}
+
+.notesTextarea:focus {
+    border-color: var(--green);
+    box-shadow: 0 0 0 3px var(--green-light);
+}
+
+.notesTextarea::placeholder { color: #c8d4df; }
 
 /* ─────────────────────────────────────────────────
    UNIVERSITY SECTION
@@ -863,6 +971,11 @@
 .uniCard:hover {
     box-shadow: var(--shadow-md);
     border-color: var(--border-strong);
+}
+
+.uniCardNotApplied {
+    border-color: #fde68a;
+    background: #fffdf5;
 }
 
 /* Card top */
@@ -991,6 +1104,7 @@
 .selectPending  { background: rgba(234,88,12,0.08) !important; color: var(--orange) !important; border-color: rgba(234,88,12,0.2) !important; }
 .selectRejected { background: rgba(185,28,28,0.07) !important; color: var(--red) !important; border-color: rgba(185,28,28,0.2) !important; }
 .selectDefault  { background: var(--card); color: var(--ink); }
+.selectNotApplied { background: rgba(180,83,9,0.07) !important; color: var(--amber) !important; border-color: rgba(180,83,9,0.2) !important; }
 
 .inputRejected {
     border-color: rgba(185,28,28,0.3) !important;
@@ -1098,5 +1212,5 @@
         max-height: 92vh;
     }
 
-    .modalInfoStrip { overflow-x: auto; }
+    .uniFieldsGrid { grid-template-columns: 1fr; }
 }

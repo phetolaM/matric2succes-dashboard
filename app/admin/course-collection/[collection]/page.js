@@ -27,6 +27,7 @@ const UNIVERSITIES_WITH_FORMS = [
     "smu",
     "tut",
     "ukzn",
+    "unizulu",
 ];
 
 const getUniversityDisplayName = (collectionName) => {
@@ -203,11 +204,11 @@ export default function CourseCollectionDetailPage() {
                         </div>
 
                         <div className={styles.metaRow}>
-                            {course.courseCode && (
+                            {/* {course.courseCode && (
                                 <span className={styles.chip}>
                                     Code: {course.courseCode}
                                 </span>
-                            )}
+                            )} */}
                             {course.duration && (
                                 <span className={styles.chip}>
                                     Duration: {course.duration}
@@ -250,17 +251,17 @@ export default function CourseCollectionDetailPage() {
                             </div>
                         )}
 
-                        {(["nmu", "ufs"].includes(collection.toLowerCase())
+                        {(["nmu", "ufs", "unizulu"].includes(collection.toLowerCase())
                             ? course.faculty
                             : course.majoring) && (
                             <p className={styles.subtext}>
-                                {["nmu", "ufs"].includes(
+                                {["nmu", "ufs", "unizulu"].includes(
                                     collection.toLowerCase(),
                                 )
                                     ? "Faculty"
                                     : "Major"}
                                 :{" "}
-                                {["nmu", "ufs"].includes(
+                                {["nmu", "ufs", "unizulu"].includes(
                                     collection.toLowerCase(),
                                 )
                                     ? course.faculty

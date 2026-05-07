@@ -19,31 +19,51 @@ import {
     FiHash,
     FiLock,
     FiAward,
+    FiMail,
+    FiAlertTriangle,
+    FiDollarSign,
+    FiFileText,
 } from "react-icons/fi";
 
-const PROGRESS_OPTIONS = ["Not Started", "Pending", "Done"];
-const RESULT_OPTIONS = ["", "Accepted", "Rejected"];
+/* ─────────────────────────────────────────────────
+   CONSTANTS
+───────────────────────────────────────────────── */
+
+const PROGRESS_OPTIONS        = ["Not Started", "Pending", "Done"];
+const APPLICATION_STATUS_OPTIONS = ["Not Applied", "Applied", "Accepted", "Rejected"];
 const STUDENT_PROGRESS_OPTIONS = ["Not Started", "In Progress", "Done"];
 
+/* ─────────────────────────────────────────────────
+   HELPERS
+───────────────────────────────────────────────── */
+
 function normalizeStudentProgress(value) {
-    const normalized = String(value || "").trim().toLowerCase();
-    if (normalized === "done") return "Done";
-    if (normalized === "in progress" || normalized === "inprogress") return "In Progress";
-    if (normalized === "pending") return "In Progress";
+    const n = String(value || "").trim().toLowerCase();
+    if (n === "done") return "Done";
+    if (n === "in progress" || n === "inprogress" || n === "pending") return "In Progress";
     return "Not Started";
 }
 
 function toDateInputValue(dateValue) {
     if (!dateValue) return "";
-    const date = new Date(dateValue);
-    if (Number.isNaN(date.getTime())) return "";
-    return date.toISOString().split("T")[0];
+    const d = new Date(dateValue);
+    if (Number.isNaN(d.getTime())) return "";
+    return d.toISOString().split("T")[0];
 }
+
+function formatCurrency(amount, currency = "R") {
+    const n = Number(amount) || 0;
+    return `${currency}${n.toLocaleString("en-ZA")}`;
+}
+
+/* ─────────────────────────────────────────────────
+   MICRO COMPONENTS
+───────────────────────────────────────────────── */
 
 function ProgressBadge({ value }) {
     const normalized = normalizeStudentProgress(value);
     const classMap = {
-        "Done": styles.badgeDone,
+        "Done":        styles.badgeDone,
         "In Progress": styles.badgeInProgress,
         "Not Started": styles.badgeNotStarted,
     };
@@ -54,18 +74,26 @@ function ProgressBadge({ value }) {
     );
 }
 
-function UniStatusPill({ status }) {
-    const cls =
-        status === "Done" ? styles.pillDone
-        : status === "Pending" ? styles.pillPending
-        : styles.pillDefault;
-    return <span className={`${styles.pill} ${cls}`}>{status || "Not Started"}</span>;
+function AppStatusPill({ status }) {
+    const map = {
+        "Applied":     styles.pillPending,
+        "Accepted":    styles.pillDone,
+        "Rejected":    styles.pillRejected,
+        "Not Applied": styles.pillNotApplied,
+    };
+    return (
+        <span className={`${styles.pill} ${map[status] || styles.pillDefault}`}>
+            {status || "Not Applied"}
+        </span>
+    );
 }
 
-function ResultPill({ result }) {
-    if (!result) return <span className={`${styles.pill} ${styles.pillDefault}`}>—</span>;
-    const cls = result === "Accepted" ? styles.pillDone : styles.pillRejected;
-    return <span className={`${styles.pill} ${cls}`}>{result}</span>;
+function UniStatusPill({ status }) {
+    const cls =
+        status === "Done" ? styles.pillDone :
+        status === "Pending" ? styles.pillPending :
+        styles.pillDefault;
+    return <span className={`${styles.pill} ${cls}`}>{status || "Not Started"}</span>;
 }
 
 function SkeletonCard() {
@@ -83,22 +111,27 @@ function SkeletonCard() {
     );
 }
 
+/* ─────────────────────────────────────────────────
+   MAIN PAGE
+───────────────────────────────────────────────── */
+
 export default function ApplicationAssistancePage() {
     const router = useRouter();
 
-    const [clients, setClients] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState("");
-    const [searchTerm, setSearchTerm] = useState("");
-    const [studentProgressFilter, setStudentProgressFilter] = useState("Not Started");
-    const [isRefreshing, setIsRefreshing] = useState(false);
-    const [isSavingById, setIsSavingById] = useState({});
-    const [saveSuccess, setSaveSuccess] = useState(false);
+    const [clients,              setClients]              = useState([]);
+    const [loading,              setLoading]              = useState(true);
+    const [error,                setError]                = useState("");
+    const [searchTerm,           setSearchTerm]           = useState("");
+    const [studentProgressFilter,setStudentProgressFilter]= useState("Not Started");
+    const [isRefreshing,         setIsRefreshing]         = useState(false);
+    const [isSavingById,         setIsSavingById]         = useState({});
+    const [saveSuccess,          setSaveSuccess]          = useState(false);
 
-    /* modal state */
+    /* modal */
     const [modalClient, setModalClient] = useState(null);
-    const [modalOpen, setModalOpen] = useState(false);
+    const [modalOpen,   setModalOpen]   = useState(false);
 
+    /* ── fetch ── */
     const fetchClients = useCallback(async () => {
         try {
             setError("");
@@ -109,6 +142,20 @@ export default function ApplicationAssistancePage() {
             const normalized = (Array.isArray(data) ? data : []).map((c) => ({
                 ...c,
                 studentProgress: normalizeStudentProgress(c.studentProgress),
+                universityApplications: (c.universityApplications || []).map((u) => ({
+                    // Defaults for new fields that may not exist yet
+                    applicationStatus: "Not Applied",
+                    applicationEmail:  "",
+                    studentNumber:     u.studentNumber || "",
+                    universityPIN:     u.universityPIN || "",
+                    universityPassword:u.universityPassword || "",
+                    appliedDate:       u.appliedDate || null,
+                    applicationResult: u.applicationResult || "",
+                    rejectionReason:   u.rejectionReason || "",
+                    progressStatus:    u.progressStatus || "Not Started",
+                    notes:             u.notes || "",
+                    ...u, // real data overwrites defaults
+                })),
             }));
             setClients(normalized);
         } catch (e) {
@@ -121,13 +168,13 @@ export default function ApplicationAssistancePage() {
     }, []);
 
     useEffect(() => { fetchClients(); }, [fetchClients]);
-
     useEffect(() => {
-        const handleKey = (e) => { if (e.key === "Escape") closeModal(); };
-        window.addEventListener("keydown", handleKey);
-        return () => window.removeEventListener("keydown", handleKey);
+        const onKey = (e) => { if (e.key === "Escape") closeModal(); };
+        window.addEventListener("keydown", onKey);
+        return () => window.removeEventListener("keydown", onKey);
     }, []);
 
+    /* ── modal helpers ── */
     const openModal = (client) => {
         setModalClient(JSON.parse(JSON.stringify(client)));
         setModalOpen(true);
@@ -140,40 +187,68 @@ export default function ApplicationAssistancePage() {
         setTimeout(() => setModalClient(null), 300);
     };
 
-    const filteredClients = useMemo(() => {
-        const term = searchTerm.trim().toLowerCase();
-        return clients.filter((c) => {
-            const matchesProgress = normalizeStudentProgress(c.studentProgress) === studentProgressFilter;
-            if (!matchesProgress) return false;
-            if (!term) return true;
-            return (
-                String(c.fullName || "").toLowerCase().includes(term) ||
-                String(c.email || "").toLowerCase().includes(term) ||
-                String(c.phoneNumber || "").toLowerCase().includes(term)
-            );
-        });
-    }, [clients, searchTerm, studentProgressFilter]);
-
-    const doneCount = useMemo(() =>
-        clients.reduce((n, c) => n + (c.universityApplications || []).filter((u) => u.progressStatus === "Done").length, 0),
+    /* ── derived stats ── */
+    const totalRevenue = useMemo(() =>
+        clients.reduce((sum, c) => sum + (Number(c.amount) || 0), 0),
     [clients]);
 
-    const totalTasks = useMemo(() =>
+    const totalUniTasks = useMemo(() =>
         clients.reduce((n, c) => n + (c.universityApplications || []).length, 0),
+    [clients]);
+
+    const notAppliedCount = useMemo(() =>
+        clients.reduce((n, c) =>
+            n + (c.universityApplications || []).filter(
+                (u) => (u.applicationStatus || "Not Applied") === "Not Applied"
+            ).length, 0),
+    [clients]);
+
+    const acceptedCount = useMemo(() =>
+        clients.reduce((n, c) =>
+            n + (c.universityApplications || []).filter(
+                (u) => u.applicationStatus === "Accepted"
+            ).length, 0),
     [clients]);
 
     const progressCounts = useMemo(() => ({
         notStarted: clients.filter((c) => normalizeStudentProgress(c.studentProgress) === "Not Started").length,
         inProgress: clients.filter((c) => normalizeStudentProgress(c.studentProgress) === "In Progress").length,
-        done: clients.filter((c) => normalizeStudentProgress(c.studentProgress) === "Done").length,
+        done:       clients.filter((c) => normalizeStudentProgress(c.studentProgress) === "Done").length,
     }), [clients]);
 
-    /* modal field updates */
+    /* pending unapplied list for urgent banner */
+    const urgentUnapplied = useMemo(() => {
+        const items = [];
+        clients.forEach((c) => {
+            (c.universityApplications || []).forEach((u) => {
+                if ((u.applicationStatus || "Not Applied") === "Not Applied") {
+                    items.push({ client: c.fullName, uni: u.universityName });
+                }
+            });
+        });
+        return items.slice(0, 8);
+    }, [clients]);
+
+    /* ── filtered list ── */
+    const filteredClients = useMemo(() => {
+        const term = searchTerm.trim().toLowerCase();
+        return clients.filter((c) => {
+            if (normalizeStudentProgress(c.studentProgress) !== studentProgressFilter) return false;
+            if (!term) return true;
+            return (
+                String(c.fullName    || "").toLowerCase().includes(term) ||
+                String(c.email       || "").toLowerCase().includes(term) ||
+                String(c.phoneNumber || "").toLowerCase().includes(term)
+            );
+        });
+    }, [clients, searchTerm, studentProgressFilter]);
+
+    /* ── modal field update ── */
     const updateUniField = (index, field, value) => {
         setModalClient((prev) => {
             const apps = [...(prev.universityApplications || [])];
             const next = { ...apps[index], [field]: value };
-            if (field === "applicationResult" && value !== "Rejected") next.rejectionReason = "";
+            if (field === "applicationStatus" && value !== "Rejected") next.rejectionReason = "";
             apps[index] = next;
             return { ...prev, universityApplications: apps };
         });
@@ -186,6 +261,7 @@ export default function ApplicationAssistancePage() {
         }));
     };
 
+    /* ── save ── */
     const saveModal = async () => {
         if (!modalClient) return;
         const clientId = modalClient._id;
@@ -195,15 +271,19 @@ export default function ApplicationAssistancePage() {
             const payload = {
                 id: clientId,
                 studentProgress: normalizeStudentProgress(modalClient.studentProgress),
+                notes: modalClient.notes || "",
                 universityApplications: (modalClient.universityApplications || []).map((item) => ({
-                    universityName: item.universityName || "",
-                    appliedDate: item.appliedDate || null,
-                    universityPIN: item.universityPIN || "",
-                    studentNumber: item.studentNumber || "",
-                    universityPassword: item.universityPassword || "",
-                    progressStatus: item.progressStatus || "Not Started",
+                    universityName:    item.universityName    || "",
+                    appliedDate:       item.appliedDate       || null,
+                    universityPIN:     item.universityPIN     || "",
+                    studentNumber:     item.studentNumber     || "",
+                    universityPassword:item.universityPassword|| "",
+                    applicationEmail:  item.applicationEmail  || "",
+                    progressStatus:    item.progressStatus    || "Not Started",
+                    applicationStatus: item.applicationStatus || "Not Applied",
                     applicationResult: item.applicationResult || "",
-                    rejectionReason: item.rejectionReason || "",
+                    rejectionReason:   item.rejectionReason   || "",
+                    notes:             item.notes             || "",
                 })),
             };
             const res = await fetch("/api/application-assistance", {
@@ -213,11 +293,11 @@ export default function ApplicationAssistancePage() {
             });
             if (!res.ok) throw new Error("Save failed");
             const updated = await res.json();
-            const normalizedUpdated = {
+            const nu = {
                 ...updated,
                 studentProgress: normalizeStudentProgress(updated.studentProgress),
             };
-            setClients((prev) => prev.map((c) => (c._id === clientId ? normalizedUpdated : c)));
+            setClients((prev) => prev.map((c) => (c._id === clientId ? nu : c)));
             setSaveSuccess(true);
             setTimeout(() => setSaveSuccess(false), 2500);
             closeModal();
@@ -231,6 +311,9 @@ export default function ApplicationAssistancePage() {
 
     const isSavingModal = modalClient ? Boolean(isSavingById[modalClient._id]) : false;
 
+    /* ─────────────────────────────────────────────────
+       RENDER
+    ───────────────────────────────────────────────── */
     return (
         <div className={styles.root}>
 
@@ -273,15 +356,44 @@ export default function ApplicationAssistancePage() {
                     </div>
                 )}
 
-                {/* ── STATS ── */}
+                {/* ── STATS ROW ── */}
                 <div className={styles.statsRow}>
                     {[
-                        { label: "Total Clients",      value: clients.length,     color: "#00563b", icon: <FiUser /> },
-                        { label: "Not Started",         value: progressCounts.notStarted, color: "#6b7280", icon: <FiClock /> },
-                        { label: "In Progress",         value: progressCounts.inProgress, color: "#ea580c", icon: <FiClock /> },
-                        { label: "Completed",           value: progressCounts.done, color: "#00563b", icon: <FiCheckCircle /> },
-                        { label: "University Tasks",    value: totalTasks,         color: "#6366f1", icon: <FiList /> },
-                        { label: "Tasks Done",          value: doneCount,          color: "#00563b", icon: <FiCheckCircle /> },
+                        {
+                            label: "Total Clients",
+                            value: clients.length,
+                            color: "#00563b",
+                            icon: <FiUser />,
+                            suffix: "",
+                        },
+                        {
+                            label: "Total Revenue",
+                            value: formatCurrency(totalRevenue, clients[0]?.currency || "R"),
+                            color: "#00563b",
+                            icon: <FiDollarSign />,
+                            isString: true,
+                        },
+                        {
+                            label: "Not Applied",
+                            value: notAppliedCount,
+                            color: "#b45309",
+                            icon: <FiAlertTriangle />,
+                            suffix: " unis",
+                        },
+                        {
+                            label: "Accepted",
+                            value: acceptedCount,
+                            color: "#00563b",
+                            icon: <FiAward />,
+                            suffix: "",
+                        },
+                        {
+                            label: "Total Unis",
+                            value: totalUniTasks,
+                            color: "#6366f1",
+                            icon: <FiList />,
+                            suffix: "",
+                        },
                     ].map((s, i) => (
                         <div key={s.label} className={styles.statCard} style={{ animationDelay: `${i * 0.06}s` }}>
                             <div className={styles.statIconWrap} style={{ background: `${s.color}14`, color: s.color }}>
@@ -289,11 +401,38 @@ export default function ApplicationAssistancePage() {
                             </div>
                             <div>
                                 <p className={styles.statLabel}>{s.label}</p>
-                                <strong className={styles.statValue}>{s.value}</strong>
+                                <strong className={s.isString ? styles.statValueSmall : styles.statValue}>
+                                    {s.isString ? s.value : `${s.value}${s.suffix || ""}`}
+                                </strong>
                             </div>
                         </div>
                     ))}
                 </div>
+
+                {/* ── URGENT BANNER — unapplied unis ── */}
+                {!loading && urgentUnapplied.length > 0 && (
+                    <div className={styles.urgentBanner}>
+                        <FiAlertTriangle className={styles.urgentBannerIcon} />
+                        <div>
+                            <p className={styles.urgentBannerTitle}>
+                                {notAppliedCount} universit{notAppliedCount === 1 ? "y" : "ies"} still not applied
+                            </p>
+                            <p className={styles.urgentBannerBody}>
+                                These universities haven't been applied to yet. Open each client to update their status.
+                            </p>
+                            <div className={styles.urgentBannerItems}>
+                                {urgentUnapplied.map((item, i) => (
+                                    <span key={i} className={styles.urgentBannerItem}>
+                                        {item.client} → {item.uni}
+                                    </span>
+                                ))}
+                                {notAppliedCount > 8 && (
+                                    <span className={styles.urgentBannerItem}>+{notAppliedCount - 8} more</span>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                )}
 
                 {/* ── TOOLBAR ── */}
                 <div className={styles.toolbar}>
@@ -320,7 +459,7 @@ export default function ApplicationAssistancePage() {
                                 <span className={styles.filterCount}>
                                     {opt === "Not Started" && progressCounts.notStarted}
                                     {opt === "In Progress" && progressCounts.inProgress}
-                                    {opt === "Done" && progressCounts.done}
+                                    {opt === "Done"        && progressCounts.done}
                                 </span>
                             </button>
                         ))}
@@ -340,9 +479,10 @@ export default function ApplicationAssistancePage() {
                 ) : (
                     <div className={styles.clientList}>
                         {filteredClients.map((client, i) => {
-                            const apps = client.universityApplications || [];
-                            const done = apps.filter((u) => u.progressStatus === "Done").length;
-                            const pct = apps.length > 0 ? Math.round((done / apps.length) * 100) : 0;
+                            const apps        = client.universityApplications || [];
+                            const applied     = apps.filter((u) => (u.applicationStatus || "Not Applied") !== "Not Applied").length;
+                            const pct         = apps.length > 0 ? Math.round((applied / apps.length) * 100) : 0;
+                            const unapplied   = apps.filter((u) => (u.applicationStatus || "Not Applied") === "Not Applied").length;
                             return (
                                 <div
                                     key={client._id}
@@ -359,6 +499,12 @@ export default function ApplicationAssistancePage() {
                                             <p className={styles.clientMeta}>
                                                 {client.phoneNumber || "No phone"} · {client.planName || client.planId || "N/A"}
                                             </p>
+                                            {unapplied > 0 && (
+                                                <span className={styles.unappliedWarning}>
+                                                    <FiAlertTriangle style={{ fontSize: "0.65rem" }} />
+                                                    {unapplied} not applied
+                                                </span>
+                                            )}
                                         </div>
                                     </div>
 
@@ -368,12 +514,14 @@ export default function ApplicationAssistancePage() {
                                             <div className={styles.progressBarTrack}>
                                                 <div className={styles.progressBarFill} style={{ width: `${pct}%` }} />
                                             </div>
-                                            <span className={styles.progressBarLabel}>{done}/{apps.length}</span>
+                                            <span className={styles.progressBarLabel}>{applied}/{apps.length} applied</span>
                                         </div>
                                     </div>
 
                                     <div className={styles.clientRowRight}>
-                                        <span className={styles.amountTag}>{client.currency || "R"}{client.amount || 0}</span>
+                                        <span className={styles.amountTag}>
+                                            {formatCurrency(client.amount, client.currency || "R")}
+                                        </span>
                                         <span className={styles.paidBadge}>Paid</span>
                                         <button className={styles.editBtn} onClick={() => openModal(client)}>
                                             <FiEdit3 />
@@ -388,7 +536,7 @@ export default function ApplicationAssistancePage() {
             </main>
 
             {/* ══════════════════════════════════════════
-                FULL-PAGE MODAL
+                MODAL
             ══════════════════════════════════════════ */}
             {(modalOpen || modalClient) && (
                 <>
@@ -401,7 +549,7 @@ export default function ApplicationAssistancePage() {
                         {modalClient && (
                             <div className={styles.modalInner}>
 
-                                {/* ── Modal Header ── */}
+                                {/* Header */}
                                 <div className={styles.modalHeader}>
                                     <div className={styles.modalHeaderLeft}>
                                         <div className={styles.modalAvatar}>
@@ -415,12 +563,10 @@ export default function ApplicationAssistancePage() {
                                             </p>
                                         </div>
                                     </div>
-                                    <button className={styles.modalClose} onClick={closeModal}>
-                                        <FiX />
-                                    </button>
+                                    <button className={styles.modalClose} onClick={closeModal}><FiX /></button>
                                 </div>
 
-                                {/* ── Client info strip ── */}
+                                {/* Info strip */}
                                 <div className={styles.modalInfoStrip}>
                                     <div className={styles.infoStripItem}>
                                         <span className={styles.infoStripLabel}>Plan</span>
@@ -435,7 +581,7 @@ export default function ApplicationAssistancePage() {
                                     <div className={styles.infoStripItem}>
                                         <span className={styles.infoStripLabel}>Amount Paid</span>
                                         <span className={`${styles.infoStripValue} ${styles.infoStripGreen}`}>
-                                            {modalClient.currency || "R"}{modalClient.amount || 0}
+                                            {formatCurrency(modalClient.amount, modalClient.currency || "R")}
                                         </span>
                                     </div>
                                     <div className={styles.infoStripDivider} />
@@ -445,12 +591,21 @@ export default function ApplicationAssistancePage() {
                                             {(modalClient.universityApplications || []).length}
                                         </span>
                                     </div>
+                                    <div className={styles.infoStripDivider} />
+                                    <div className={styles.infoStripItem}>
+                                        <span className={styles.infoStripLabel}>Not Applied</span>
+                                        <span className={styles.infoStripValue} style={{ color: "var(--amber)" }}>
+                                            {(modalClient.universityApplications || []).filter(
+                                                (u) => (u.applicationStatus || "Not Applied") === "Not Applied"
+                                            ).length}
+                                        </span>
+                                    </div>
                                 </div>
 
-                                {/* ── Scrollable body ── */}
+                                {/* Body */}
                                 <div className={styles.modalBody}>
 
-                                    {/* ── Overall progress ── */}
+                                    {/* Overall progress */}
                                     <div className={styles.modalSection}>
                                         <h3 className={styles.modalSectionTitle}>Overall Student Progress</h3>
                                         <div className={styles.progressBtns}>
@@ -469,7 +624,20 @@ export default function ApplicationAssistancePage() {
                                         </div>
                                     </div>
 
-                                    {/* ── Universities ── */}
+                                    {/* General notes */}
+                                    <div className={styles.modalSection}>
+                                        <h3 className={styles.modalSectionTitle}>General Notes</h3>
+                                        <textarea
+                                            className={styles.notesTextarea}
+                                            placeholder="Add any general notes about this client…"
+                                            value={modalClient.notes || ""}
+                                            onChange={(e) =>
+                                                setModalClient((prev) => ({ ...prev, notes: e.target.value }))
+                                            }
+                                        />
+                                    </div>
+
+                                    {/* University applications */}
                                     <div className={styles.modalSection}>
                                         <div className={styles.uniSectionHeader}>
                                             <h3 className={styles.modalSectionTitle}>University Applications</h3>
@@ -479,148 +647,184 @@ export default function ApplicationAssistancePage() {
                                         </div>
 
                                         <div className={styles.uniGrid}>
-                                            {(modalClient.universityApplications || []).map((item, index) => (
-                                                <div key={`${item.universityName}-${index}`} className={styles.uniCard}>
-
-                                                    {/* Card top bar */}
-                                                    <div className={styles.uniCardTop}>
-                                                        <div className={styles.uniCardTopLeft}>
-                                                            <div className={styles.uniIndexBadge}>{String(index + 1).padStart(2, "0")}</div>
-                                                            <div>
-                                                                <h4 className={styles.uniName}>{item.universityName}</h4>
-                                                                <div className={styles.uniPillRow}>
-                                                                    <UniStatusPill status={item.progressStatus} />
-                                                                    <ResultPill result={item.applicationResult} />
+                                            {(modalClient.universityApplications || []).map((item, index) => {
+                                                const isNotApplied = (item.applicationStatus || "Not Applied") === "Not Applied";
+                                                return (
+                                                    <div
+                                                        key={`${item.universityName}-${index}`}
+                                                        className={`${styles.uniCard} ${isNotApplied ? styles.uniCardNotApplied : ""}`}
+                                                    >
+                                                        {/* Card top */}
+                                                        <div className={styles.uniCardTop}>
+                                                            <div className={styles.uniCardTopLeft}>
+                                                                <div className={styles.uniIndexBadge}>
+                                                                    {String(index + 1).padStart(2, "0")}
+                                                                </div>
+                                                                <div>
+                                                                    <h4 className={styles.uniName}>{item.universityName}</h4>
+                                                                    <div className={styles.uniPillRow}>
+                                                                        <AppStatusPill status={item.applicationStatus || "Not Applied"} />
+                                                                        <UniStatusPill status={item.progressStatus} />
+                                                                    </div>
                                                                 </div>
                                                             </div>
-                                                        </div>
-                                                        {/* Quick progress select */}
-                                                        <select
-                                                            className={`${styles.uniQuickSelect} ${
-                                                                item.progressStatus === "Done" ? styles.selectDone
-                                                                : item.progressStatus === "Pending" ? styles.selectPending
-                                                                : styles.selectDefault
-                                                            }`}
-                                                            value={item.progressStatus || "Not Started"}
-                                                            onChange={(e) => updateUniField(index, "progressStatus", e.target.value)}
-                                                        >
-                                                            {PROGRESS_OPTIONS.map((opt) => (
-                                                                <option key={opt} value={opt}>{opt}</option>
-                                                            ))}
-                                                        </select>
-                                                    </div>
-
-                                                    {/* Fields grid */}
-                                                    <div className={styles.uniFieldsGrid}>
-
-                                                        {/* Applied date */}
-                                                        <div className={styles.uniFieldGroup}>
-                                                            <label className={styles.uniFieldLabel}>
-                                                                <FiCalendar className={styles.uniFieldIcon} />
-                                                                Applied Date
-                                                            </label>
-                                                            <input
-                                                                type="date"
-                                                                className={styles.uniFieldInput}
-                                                                value={toDateInputValue(item.appliedDate)}
-                                                                onChange={(e) => updateUniField(index, "appliedDate", e.target.value || null)}
-                                                            />
-                                                        </div>
-
-                                                        {/* PIN */}
-                                                        <div className={styles.uniFieldGroup}>
-                                                            <label className={styles.uniFieldLabel}>
-                                                                <FiHash className={styles.uniFieldIcon} />
-                                                                University PIN
-                                                            </label>
-                                                            <input
-                                                                type="text"
-                                                                className={styles.uniFieldInput}
-                                                                placeholder="e.g. 12345"
-                                                                value={item.universityPIN || ""}
-                                                                onChange={(e) => updateUniField(index, "universityPIN", e.target.value)}
-                                                            />
-                                                        </div>
-
-                                                        {/* Student number */}
-                                                        <div className={styles.uniFieldGroup}>
-                                                            <label className={styles.uniFieldLabel}>
-                                                                <FiUser className={styles.uniFieldIcon} />
-                                                                Student Number
-                                                            </label>
-                                                            <input
-                                                                type="text"
-                                                                className={styles.uniFieldInput}
-                                                                placeholder="e.g. 202301234"
-                                                                value={item.studentNumber || ""}
-                                                                onChange={(e) => updateUniField(index, "studentNumber", e.target.value)}
-                                                            />
-                                                        </div>
-
-                                                        {/* Password */}
-                                                        <div className={styles.uniFieldGroup}>
-                                                            <label className={styles.uniFieldLabel}>
-                                                                <FiLock className={styles.uniFieldIcon} />
-                                                                Portal Password
-                                                            </label>
-                                                            <input
-                                                                type="text"
-                                                                className={styles.uniFieldInput}
-                                                                placeholder="Portal password"
-                                                                value={item.universityPassword || ""}
-                                                                onChange={(e) => updateUniField(index, "universityPassword", e.target.value)}
-                                                            />
-                                                        </div>
-
-                                                        {/* Result */}
-                                                        <div className={styles.uniFieldGroup}>
-                                                            <label className={styles.uniFieldLabel}>
-                                                                <FiAward className={styles.uniFieldIcon} />
-                                                                Application Result
-                                                            </label>
+                                                            {/* Application status quick-select */}
                                                             <select
-                                                                className={`${styles.uniFieldInput} ${
-                                                                    item.applicationResult === "Accepted" ? styles.selectDone
-                                                                    : item.applicationResult === "Rejected" ? styles.selectRejected
-                                                                    : styles.selectDefault
+                                                                className={`${styles.uniQuickSelect} ${
+                                                                    item.applicationStatus === "Accepted"   ? styles.selectDone :
+                                                                    item.applicationStatus === "Applied"    ? styles.selectPending :
+                                                                    item.applicationStatus === "Rejected"   ? styles.selectRejected :
+                                                                    styles.selectNotApplied
                                                                 }`}
-                                                                value={item.applicationResult || ""}
-                                                                onChange={(e) => updateUniField(index, "applicationResult", e.target.value)}
+                                                                value={item.applicationStatus || "Not Applied"}
+                                                                onChange={(e) => updateUniField(index, "applicationStatus", e.target.value)}
                                                             >
-                                                                {RESULT_OPTIONS.map((opt) => (
-                                                                    <option key={opt || "blank"} value={opt}>{opt || "Pending"}</option>
+                                                                {APPLICATION_STATUS_OPTIONS.map((opt) => (
+                                                                    <option key={opt} value={opt}>{opt}</option>
                                                                 ))}
                                                             </select>
                                                         </div>
 
-                                                        {/* Rejection reason — only when rejected */}
-                                                        {item.applicationResult === "Rejected" && (
-                                                            <div className={`${styles.uniFieldGroup} ${styles.uniFieldGroupFull}`}>
+                                                        {/* Fields grid */}
+                                                        <div className={styles.uniFieldsGrid}>
+
+                                                            {/* Applied date */}
+                                                            <div className={styles.uniFieldGroup}>
                                                                 <label className={styles.uniFieldLabel}>
-                                                                    <FiAlertCircle className={styles.uniFieldIcon} />
-                                                                    Rejection Reason
+                                                                    <FiCalendar className={styles.uniFieldIcon} />
+                                                                    Date Applied
+                                                                </label>
+                                                                <input
+                                                                    type="date"
+                                                                    className={styles.uniFieldInput}
+                                                                    value={toDateInputValue(item.appliedDate)}
+                                                                    onChange={(e) => updateUniField(index, "appliedDate", e.target.value || null)}
+                                                                />
+                                                            </div>
+
+                                                            {/* Student number */}
+                                                            <div className={styles.uniFieldGroup}>
+                                                                <label className={styles.uniFieldLabel}>
+                                                                    <FiHash className={styles.uniFieldIcon} />
+                                                                    Student Number
                                                                 </label>
                                                                 <input
                                                                     type="text"
-                                                                    className={`${styles.uniFieldInput} ${styles.inputRejected}`}
-                                                                    placeholder="Enter reason for rejection…"
-                                                                    value={item.rejectionReason || ""}
-                                                                    onChange={(e) => updateUniField(index, "rejectionReason", e.target.value)}
+                                                                    className={styles.uniFieldInput}
+                                                                    placeholder="e.g. 202301234"
+                                                                    value={item.studentNumber || ""}
+                                                                    onChange={(e) => updateUniField(index, "studentNumber", e.target.value)}
                                                                 />
                                                             </div>
-                                                        )}
+
+                                                            {/* PIN */}
+                                                            <div className={styles.uniFieldGroup}>
+                                                                <label className={styles.uniFieldLabel}>
+                                                                    <FiLock className={styles.uniFieldIcon} />
+                                                                    PIN / Code
+                                                                </label>
+                                                                <input
+                                                                    type="text"
+                                                                    className={styles.uniFieldInput}
+                                                                    placeholder="e.g. 12345"
+                                                                    value={item.universityPIN || ""}
+                                                                    onChange={(e) => updateUniField(index, "universityPIN", e.target.value)}
+                                                                />
+                                                            </div>
+
+                                                            {/* Application email */}
+                                                            <div className={styles.uniFieldGroup}>
+                                                                <label className={styles.uniFieldLabel}>
+                                                                    <FiMail className={styles.uniFieldIcon} />
+                                                                    Email Used
+                                                                </label>
+                                                                <input
+                                                                    type="email"
+                                                                    className={styles.uniFieldInput}
+                                                                    placeholder="email@example.com"
+                                                                    value={item.applicationEmail || ""}
+                                                                    onChange={(e) => updateUniField(index, "applicationEmail", e.target.value)}
+                                                                />
+                                                            </div>
+
+                                                            {/* Portal password */}
+                                                            <div className={styles.uniFieldGroup}>
+                                                                <label className={styles.uniFieldLabel}>
+                                                                    <FiLock className={styles.uniFieldIcon} />
+                                                                    Portal Password
+                                                                </label>
+                                                                <input
+                                                                    type="text"
+                                                                    className={styles.uniFieldInput}
+                                                                    placeholder="Portal password"
+                                                                    value={item.universityPassword || ""}
+                                                                    onChange={(e) => updateUniField(index, "universityPassword", e.target.value)}
+                                                                />
+                                                            </div>
+
+                                                            {/* Progress status (internal workflow) */}
+                                                            <div className={styles.uniFieldGroup}>
+                                                                <label className={styles.uniFieldLabel}>
+                                                                    <FiClock className={styles.uniFieldIcon} />
+                                                                    Task Progress
+                                                                </label>
+                                                                <select
+                                                                    className={`${styles.uniFieldInput} ${
+                                                                        item.progressStatus === "Done"    ? styles.selectDone :
+                                                                        item.progressStatus === "Pending" ? styles.selectPending :
+                                                                        styles.selectDefault
+                                                                    }`}
+                                                                    value={item.progressStatus || "Not Started"}
+                                                                    onChange={(e) => updateUniField(index, "progressStatus", e.target.value)}
+                                                                >
+                                                                    {PROGRESS_OPTIONS.map((opt) => (
+                                                                        <option key={opt} value={opt}>{opt}</option>
+                                                                    ))}
+                                                                </select>
+                                                            </div>
+
+                                                            {/* Rejection reason — only when rejected */}
+                                                            {item.applicationStatus === "Rejected" && (
+                                                                <div className={`${styles.uniFieldGroup} ${styles.uniFieldGroupFull}`}>
+                                                                    <label className={styles.uniFieldLabel}>
+                                                                        <FiAlertCircle className={styles.uniFieldIcon} />
+                                                                        Rejection Reason
+                                                                    </label>
+                                                                    <input
+                                                                        type="text"
+                                                                        className={`${styles.uniFieldInput} ${styles.inputRejected}`}
+                                                                        placeholder="Enter reason for rejection…"
+                                                                        value={item.rejectionReason || ""}
+                                                                        onChange={(e) => updateUniField(index, "rejectionReason", e.target.value)}
+                                                                    />
+                                                                </div>
+                                                            )}
+
+                                                            {/* Per-university notes */}
+                                                            <div className={`${styles.uniFieldGroup} ${styles.uniFieldGroupFull}`}>
+                                                                <label className={styles.uniFieldLabel}>
+                                                                    <FiFileText className={styles.uniFieldIcon} />
+                                                                    Notes
+                                                                </label>
+                                                                <input
+                                                                    type="text"
+                                                                    className={styles.uniFieldInput}
+                                                                    placeholder="Any notes for this university…"
+                                                                    value={item.notes || ""}
+                                                                    onChange={(e) => updateUniField(index, "notes", e.target.value)}
+                                                                />
+                                                            </div>
+                                                        </div>
                                                     </div>
-                                                </div>
-                                            ))}
+                                                );
+                                            })}
                                         </div>
                                     </div>
                                 </div>
 
-                                {/* ── Modal Footer ── */}
+                                {/* Footer */}
                                 <div className={styles.modalFooter}>
-                                    <button className={styles.cancelBtn} onClick={closeModal}>
-                                        Cancel
-                                    </button>
+                                    <button className={styles.cancelBtn} onClick={closeModal}>Cancel</button>
                                     <button className={styles.saveBtn} onClick={saveModal} disabled={isSavingModal}>
                                         <FiSave />
                                         {isSavingModal ? "Saving…" : "Save changes"}
