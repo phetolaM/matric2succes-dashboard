@@ -11,6 +11,7 @@ import {
     FiBell,
     FiToggleLeft,
     FiClipboard,
+    FiSearch,
 } from "react-icons/fi";
 import { MdAttachEmail } from "react-icons/md";
 import { ImBooks } from "react-icons/im";
@@ -80,6 +81,14 @@ export default function AdminDashboard() {
             icon: ImBooks,
             route: "/admin/course-collection",
             colorClass: "courseCollection",
+        },
+        {
+            id: "course-finder",
+            title: "Course Finder",
+            description: "Search courses by university requirements",
+            icon: FiSearch,
+            route: "/dashboard/course-finder",
+            colorClass: "courseFinder",
         },
         {
             id: "aps-visibility",

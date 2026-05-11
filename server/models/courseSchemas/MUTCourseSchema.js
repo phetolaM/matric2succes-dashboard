@@ -5,7 +5,7 @@ const LanguageRequirementSchema = new mongoose.Schema(
         subjectId: { type: String, required: false },
         percentage: { type: Number, required: false },
     },
-    { _id: false }
+    { _id: false },
 );
 
 const SubjectRequirementSchema = new mongoose.Schema(
@@ -13,7 +13,7 @@ const SubjectRequirementSchema = new mongoose.Schema(
         subjectId: { type: String, required: true },
         percentage: { type: Number, required: false },
     },
-    { _id: false }
+    { _id: false },
 );
 
 const AdditionalRequirementSchema = new mongoose.Schema(
@@ -22,13 +22,15 @@ const AdditionalRequirementSchema = new mongoose.Schema(
         level: { type: Number, required: true },
         note: { type: String, required: false },
     },
-    { _id: false }
+    { _id: false },
 );
 
 const MUTCourseSchema = new mongoose.Schema(
     {
         courseName: { type: String, required: true, trim: true },
         courseCode: { type: String, trim: true },
+        faculty: { type: String, trim: true },
+        qualificationLevel: { type: String, trim: true },
         duration: { type: String, trim: true },
         methodOfStudy: { type: String, trim: true },
         careerChoices: { type: [String], default: [] },
@@ -44,6 +46,16 @@ const MUTCourseSchema = new mongoose.Schema(
         additionalLanguageRequirement: {
             subjectId: { type: String },
             percentage: { type: Number, min: 0, max: 100 },
+        },
+        languageRequirements: {
+            type: [
+                {
+                    subjectId: { type: String },
+                    homeLanguagePercentage: { type: Number, min: 0, max: 100 },
+                    additionalLanguagePercentage: { type: Number, min: 0, max: 100 },
+                },
+            ],
+            default: [],
         },
         // When both home and additional language requirements are present,
         // this operator controls whether the admin intended BOTH to be
@@ -98,7 +110,7 @@ const MUTCourseSchema = new mongoose.Schema(
             default: [],
         },
     },
-    { timestamps: true, collection: "mut" }
+    { timestamps: true, collection: "mut" },
 );
 
 MUTCourseSchema.index({ courseName: 1 });

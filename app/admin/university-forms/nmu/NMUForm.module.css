@@ -482,6 +482,31 @@
     cursor: not-allowed;
 }
 
+.deleteBtn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 1rem 1.25rem;
+    background: #fff5f5;
+    color: #dc2626;
+    border: 1px solid #fecaca;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.deleteBtn:hover:not(:disabled) {
+    background: #fee2e2;
+    border-color: #fca5a5;
+}
+
+.deleteBtn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
 @media (max-width: 640px) {
     .form {
         gap: 1.5rem;
@@ -516,7 +541,8 @@
         flex-direction: column-reverse;
     }
 
-    .submitBtn {
+    .submitBtn,
+    .deleteBtn {
         width: 100%;
     }
 }

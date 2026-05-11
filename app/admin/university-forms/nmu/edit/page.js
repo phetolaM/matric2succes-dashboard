@@ -2,7 +2,7 @@
 
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState, useEffect, Suspense } from "react";
-import { FiArrowLeft, FiPlus, FiX } from "react-icons/fi";
+import { FiArrowLeft, FiPlus, FiTrash2, FiX } from "react-icons/fi";
 import SubjectRequirementEditor from "@/app/components/SubjectRequirementEditor";
 import styles from "../../shared.module.css";
 import formStyles from "../NMUForm.module.css";
@@ -64,6 +64,7 @@ function EditCourseNMUContent() {
 
     const [course, setCourse] = useState(null);
     const [isLoading, setIsLoading] = useState(false);
+    const [isDeleting, setIsDeleting] = useState(false);
     const [isLoadingCourse, setIsLoadingCourse] = useState(true);
     const [error, setError] = useState("");
     const [subjects, setSubjects] = useState([]);
@@ -489,6 +490,42 @@ function EditCourseNMUContent() {
             console.error("Failed:", err);
             setError(err?.message || "Failed to update course");
             setIsLoading(false);
+        }
+    };
+
+    const handleDeleteCourse = async () => {
+        if (!courseId) {
+            setError("Course ID is missing. Please reload the page.");
+            return;
+        }
+
+        const confirmed = window.confirm(
+            "Are you sure you want to delete this course? This action cannot be undone.",
+        );
+        if (!confirmed) return;
+
+        try {
+            setIsDeleting(true);
+            setError("");
+
+            const res = await fetch(
+                `/api/course-collections/${UNIVERSITY_CODE}/${courseId}`,
+                { method: "DELETE" },
+            );
+
+            if (!res.ok) {
+                const apiError = await res.json().catch(() => ({}));
+                throw new Error(
+                    apiError?.message ||
+                        `API Error: ${res.status} ${res.statusText}`,
+                );
+            }
+
+            router.push(`/admin/course-collection/${UNIVERSITY_CODE}`);
+        } catch (err) {
+            console.error("Failed to delete course:", err);
+            setError(err?.message || "Failed to delete course");
+            setIsDeleting(false);
         }
     };
 
@@ -1271,8 +1308,17 @@ function EditCourseNMUContent() {
                 {/* Submit */}
                 <div className={formStyles.actions}>
                     <button
+                        type="button"
+                        onClick={handleDeleteCourse}
+                        disabled={isLoading || isDeleting}
+                        className={formStyles.deleteBtn}
+                    >
+                        <FiTrash2 />
+                        {isDeleting ? "Deleting..." : "Delete Course"}
+                    </button>
+                    <button
                         type="submit"
-                        disabled={isLoading}
+                        disabled={isLoading || isDeleting}
                         className={formStyles.submitBtn}
                     >
                         {isLoading ? "Updating..." : "Update Course"}
