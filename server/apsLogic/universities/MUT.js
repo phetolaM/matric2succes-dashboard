@@ -85,7 +85,7 @@ export function calculateAPS(data) {
     // Sum APS for best 6
     const totalAPS = best6.reduce(
         (sum, s) => sum + percentToAps(Number(s.percent || 0)),
-        0
+        0,
     );
 
     console.log("MUT APS: ", totalAPS);
@@ -153,21 +153,21 @@ export function getQualifiedCourses({
                 "life orientation",
             ]);
             const userSubjectPercents = [...userSubjectsMap.entries()].filter(
-                ([k, v]) => !excludedKeys.has(k)
+                ([k, v]) => !excludedKeys.has(k),
             );
 
             if (course.accessCourse) {
                 const minPercent = levelToPercent(3);
                 const count = userSubjectPercents.reduce(
                     (acc, [, v]) => acc + ((v || 0) >= minPercent ? 1 : 0),
-                    0
+                    0,
                 );
                 if (count < 6) return false;
             } else {
                 const minPercent = levelToPercent(4);
                 const count = userSubjectPercents.reduce(
                     (acc, [, v]) => acc + ((v || 0) >= minPercent ? 1 : 0),
-                    0
+                    0,
                 );
                 if (count < 5) return false;
             }
@@ -175,7 +175,7 @@ export function getQualifiedCourses({
             // Subject Requirements
             const mathReqs =
                 course.subjectRequirements?.filter((req) =>
-                    mathSubjects.includes(req.subjectId)
+                    mathSubjects.includes(req.subjectId),
                 ) || [];
 
             const meetsMath =
@@ -189,7 +189,7 @@ export function getQualifiedCourses({
 
             const otherReqs =
                 course.subjectRequirements?.filter(
-                    (req) => !mathSubjects.includes(req.subjectId)
+                    (req) => !mathSubjects.includes(req.subjectId),
                 ) || [];
 
             const meetsOther =
@@ -212,7 +212,7 @@ export function getQualifiedCourses({
                             (userSubjectsMap.get(subject) || 0) >=
                             req.percentage
                         );
-                    })
+                    }),
                 );
 
             // --- Subject Combination Groups ---
@@ -235,7 +235,7 @@ export function getQualifiedCourses({
                                 (userSubjectsMap.get(subject) || 0) >=
                                 req.percentage
                             );
-                        })
+                        }),
                 );
 
             // --- Additional Requirements (choose N remaining subjects at a required APS level)
@@ -304,7 +304,7 @@ export function getQualifiedCourses({
 
                     // find subjects in the remaining pool that meet the APS level
                     const qualifying = remainingSubjects.filter(
-                        (s) => percentToApsLocal(s.percent) >= level
+                        (s) => percentToApsLocal(s.percent) >= level,
                     );
 
                     if (qualifying.length < need) {
@@ -317,7 +317,7 @@ export function getQualifiedCourses({
                         .slice(0, need)
                         .map((s) => s.subject);
                     remainingSubjects = remainingSubjects.filter(
-                        (s) => !chosen.includes(s.subject)
+                        (s) => !chosen.includes(s.subject),
                     );
                 }
             }
@@ -439,7 +439,7 @@ export function getQualifiedCourses({
                 group.map((req) => ({
                     subject: idToName.get(req.subjectId) || "Unknown Subject",
                     required: req.percentage,
-                }))
+                })),
             ),
             careerChoices: course.careerChoices,
             accessCourse: !!course.accessCourse,
@@ -449,7 +449,7 @@ export function getQualifiedCourses({
                           course.homeLanguageRequirement.subjectId === "all"
                               ? "All Languages"
                               : idToName.get(
-                                    course.homeLanguageRequirement.subjectId
+                                    course.homeLanguageRequirement.subjectId,
                                 ) || "Unknown Subject",
                       percentage: course.homeLanguageRequirement.percentage,
                   }
@@ -462,7 +462,7 @@ export function getQualifiedCourses({
                               ? "All Languages"
                               : idToName.get(
                                     course.additionalLanguageRequirement
-                                        .subjectId
+                                        .subjectId,
                                 ) || "Unknown Subject",
                       percentage:
                           course.additionalLanguageRequirement.percentage,

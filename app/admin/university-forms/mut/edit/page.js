@@ -31,9 +31,10 @@ const methodOptions = [
 const levelOptions = ["Higher Certificate", "Diploma", "Bachelors Degree"];
 
 const facultyOptions = [
-    "FACULTY OF NATURAL SCIENCES",
-    "FACULTY OF MANAGEMENT SCIENCES",
-    "FACULTY OF ENGINEERING",
+    "Faculty of Natural Sciences",
+    "Faculty of Management Sciences",
+    "Faculty of Engineering",
+    "Faculty of Applied and Health Sciences",
 ];
 
 const languageOperatorOptions = ["both", "either"];
@@ -61,6 +62,11 @@ function EditCourseMUTContent() {
         qualificationLevel: "",
         duration: "",
         methodOfStudy: "Full-time",
+        apsRequirement: "",
+        additionalRequirementsSpecialActive: false,
+        additionalRequirementsSpecialCount: 3,
+        additionalRequirementsSpecialMinPercentage: "",
+        additionalRequirementsSpecialIncludeLO: false,
         careerChoices: [],
         languageRequirementOperator: "both",
         languageRequirements: [],
@@ -106,6 +112,15 @@ function EditCourseMUTContent() {
                 faculty: course.faculty || "",
                 qualificationLevel:
                     course.qualificationLevel || course.level || "",
+                apsRequirement: course.apsRequirement || course.aps || "",
+                additionalRequirementsSpecialActive:
+                    course.additionalRequirementsSpecialActive || false,
+                additionalRequirementsSpecialCount:
+                    course.additionalRequirementsSpecialCount || 3,
+                additionalRequirementsSpecialMinPercentage:
+                    course.additionalRequirementsSpecialMinPercentage || "",
+                additionalRequirementsSpecialIncludeLO:
+                    course.additionalRequirementsSpecialIncludeLO || false,
                 duration: course.duration || "",
                 methodOfStudy: course.methodOfStudy || "Full-time",
                 careerChoices: Array.isArray(course.careerChoices)
@@ -154,7 +169,11 @@ function EditCourseMUTContent() {
             ...prev,
             languageRequirements: [
                 ...prev.languageRequirements,
-                { subjectId: "", homeLanguagePercentage: "", additionalLanguagePercentage: "" },
+                {
+                    subjectId: "",
+                    homeLanguagePercentage: "",
+                    additionalLanguagePercentage: "",
+                },
             ],
         }));
     };
@@ -171,7 +190,9 @@ function EditCourseMUTContent() {
     const removeLanguageRequirement = (index) => {
         setFormData((prev) => ({
             ...prev,
-            languageRequirements: prev.languageRequirements.filter((_, i) => i !== index),
+            languageRequirements: prev.languageRequirements.filter(
+                (_, i) => i !== index,
+            ),
         }));
     };
 
@@ -443,6 +464,17 @@ function EditCourseMUTContent() {
                     : Number(v);
 
             const cleanData = {
+                apsRequirement: normInt(formData.apsRequirement),
+                additionalRequirementsSpecialActive:
+                    !!formData.additionalRequirementsSpecialActive,
+                additionalRequirementsSpecialCount: normInt(
+                    formData.additionalRequirementsSpecialCount,
+                ),
+                additionalRequirementsSpecialMinPercentage: normInt(
+                    formData.additionalRequirementsSpecialMinPercentage,
+                ),
+                additionalRequirementsSpecialIncludeLO:
+                    !!formData.additionalRequirementsSpecialIncludeLO,
                 courseName: formData.courseName,
                 courseCode: formData.courseCode,
                 faculty: formData.faculty,
@@ -453,6 +485,18 @@ function EditCourseMUTContent() {
                 accessCourse: formData.accessCourse,
                 languageRequirementOperator:
                     formData.languageRequirementOperator,
+                languageRequirements: formData.languageRequirements
+                    .filter((r) => r.subjectId)
+                    .map((r) => ({
+                        subjectId: r.subjectId,
+                        homeLanguagePercentage: r.homeLanguagePercentage
+                            ? Number(r.homeLanguagePercentage)
+                            : undefined,
+                        additionalLanguagePercentage:
+                            r.additionalLanguagePercentage
+                                ? Number(r.additionalLanguagePercentage)
+                                : undefined,
+                    })),
                 subjectRequirements: formData.subjectRequirements
                     .filter((r) => r.subjectId && r.percentage)
                     .map((r) => ({
@@ -722,8 +766,23 @@ function EditCourseMUTContent() {
                             ))}
                         </select>
                     </div>
+                </div>
 
-                    
+                {/* Aps section */}
+                <div className={formStyles.section}>
+                    <h2 className={formStyles.sectionTitle}>
+                        APS Requirement (General)
+                    </h2>
+                    <input
+                        type="number"
+                        value={formData.apsRequirement}
+                        onChange={(e) =>
+                            handleChange("apsRequirement", e.target.value)
+                        }
+                        className={formStyles.input}
+                        disabled={isLoading}
+                        min="0"
+                    />
                 </div>
 
                 {/* Career Choices */}
@@ -815,10 +874,15 @@ function EditCourseMUTContent() {
                                         }
                                         className={formStyles.input}
                                     >
-                                        <option value="">-- select language --</option>
+                                        <option value="">
+                                            -- select language --
+                                        </option>
                                         {getAvailableLanguageSubjects(idx).map(
                                             (s) => (
-                                                <option key={s._id} value={s._id}>
+                                                <option
+                                                    key={s._id}
+                                                    value={s._id}
+                                                >
                                                     {s.name}
                                                 </option>
                                             ),
@@ -870,7 +934,9 @@ function EditCourseMUTContent() {
 
                                 <button
                                     type="button"
-                                    onClick={() => removeLanguageRequirement(idx)}
+                                    onClick={() =>
+                                        removeLanguageRequirement(idx)
+                                    }
                                     className={formStyles.removeBtn}
                                     disabled={isLoading}
                                     style={{ marginTop: "0.5rem" }}
@@ -1224,103 +1290,103 @@ function EditCourseMUTContent() {
                         Additional Requirements
                     </h2>
                     <div className={formStyles.arrayField}>
-                        {formData.additionalRequirements.map((req, idx) => (
-                            <div
-                                key={idx}
-                                style={{
-                                    border: "1px solid #d1d5db",
-                                    padding: "1rem",
-                                    marginBottom: "1rem",
-                                    borderRadius: "8px",
-                                    backgroundColor: "#f9fafb",
-                                }}
-                            >
-                                <div className={formStyles.fieldGroup}>
-                                    <label className={formStyles.label}>
-                                        Description
-                                    </label>
+                        <div style={{ marginBottom: "1rem" }}>
+                            <div className={formStyles.fieldGroup}>
+                                <label className={formStyles.label}>
                                     <input
-                                        type="text"
-                                        value={req.description}
+                                        type="checkbox"
+                                        checked={
+                                            formData.additionalRequirementsSpecialActive
+                                        }
                                         onChange={(e) =>
-                                            updateAdditionalRequirement(
-                                                idx,
-                                                "description",
-                                                e.target.value,
+                                            handleChange(
+                                                "additionalRequirementsSpecialActive",
+                                                e.target.checked,
                                             )
                                         }
-                                        className={formStyles.input}
-                                        placeholder="Requirement description"
                                     />
-                                </div>
-
-                                <div className={formStyles.fieldGroup}>
-                                    <label className={formStyles.label}>
-                                        Subject (Optional)
-                                    </label>
-                                    <select
-                                        value={req.subjectId}
-                                        onChange={(e) =>
-                                            updateAdditionalRequirement(
-                                                idx,
-                                                "subjectId",
-                                                e.target.value,
-                                            )
-                                        }
-                                        className={formStyles.input}
-                                    >
-                                        <option value="">
-                                            -- select subject --
-                                        </option>
-                                        {subjects.map((s) => (
-                                            <option key={s._id} value={s._id}>
-                                                {s.name}
-                                            </option>
-                                        ))}
-                                    </select>
-                                </div>
-
-                                <div className={formStyles.fieldGroup}>
-                                    <label className={formStyles.label}>
-                                        Percentage (Optional)
-                                    </label>
-                                    <input
-                                        type="number"
-                                        value={req.percentage}
-                                        onChange={(e) =>
-                                            updateAdditionalRequirement(
-                                                idx,
-                                                "percentage",
-                                                e.target.value,
-                                            )
-                                        }
-                                        className={formStyles.input}
-                                        min="0"
-                                        max="100"
-                                    />
-                                </div>
-
-                                <button
-                                    type="button"
-                                    onClick={() =>
-                                        removeAdditionalRequirement(idx)
-                                    }
-                                    className={formStyles.removeBtn}
-                                    disabled={isLoading}
-                                    style={{ marginTop: "0.5rem" }}
-                                >
-                                    <FiX /> Remove Requirement
-                                </button>
+                                    &nbsp;Enable "Any N subjects (level 3)"
+                                    requirement
+                                </label>
                             </div>
-                        ))}
-                        <button
-                            type="button"
-                            onClick={addAdditionalRequirement}
-                            className={formStyles.addBtn}
-                            disabled={isLoading}
-                        >
-                            <FiPlus /> Add Additional Requirement
-                        </button>
+
+                            {formData.additionalRequirementsSpecialActive && (
+                                <div
+                                    style={{
+                                        border: "1px solid #e5e7eb",
+                                        padding: "1rem",
+                                        borderRadius: "8px",
+                                        backgroundColor: "#ffffff",
+                                    }}
+                                >
+                                    <div className={formStyles.fieldGroup}>
+                                        <label className={formStyles.label}>
+                                            Number of subjects
+                                        </label>
+                                        <select
+                                            value={
+                                                formData.additionalRequirementsSpecialCount
+                                            }
+                                            onChange={(e) =>
+                                                handleChange(
+                                                    "additionalRequirementsSpecialCount",
+                                                    e.target.value,
+                                                )
+                                            }
+                                            className={formStyles.input}
+                                            disabled={isLoading}
+                                        >
+                                            {[1, 2, 3, 4, 5, 6].map((n) => (
+                                                <option key={n} value={n}>
+                                                    {n}
+                                                </option>
+                                            ))}
+                                        </select>
+                                    </div>
+
+                                    <div className={formStyles.fieldGroup}>
+                                        <label className={formStyles.label}>
+                                            Minimum % for those subjects
+                                        </label>
+                                        <input
+                                            type="number"
+                                            value={
+                                                formData.additionalRequirementsSpecialMinPercentage
+                                            }
+                                            onChange={(e) =>
+                                                handleChange(
+                                                    "additionalRequirementsSpecialMinPercentage",
+                                                    e.target.value,
+                                                )
+                                            }
+                                            className={formStyles.input}
+                                            min="0"
+                                            max="100"
+                                        />
+                                    </div>
+
+                                    <div className={formStyles.fieldGroup}>
+                                        <label className={formStyles.label}>
+                                            <input
+                                                type="checkbox"
+                                                checked={
+                                                    formData.additionalRequirementsSpecialIncludeLO
+                                                }
+                                                onChange={(e) =>
+                                                    handleChange(
+                                                        "additionalRequirementsSpecialIncludeLO",
+                                                        e.target.checked,
+                                                    )
+                                                }
+                                            />
+                                            &nbsp;Include LO in selection
+                                        </label>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+
+                        {/* per-item additional requirement inputs removed; using special 'Any N subjects' controls above */}
                     </div>
                 </div>
 

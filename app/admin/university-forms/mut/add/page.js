@@ -31,9 +31,10 @@ const methodOptions = [
 const levelOptions = ["Higher Certificate", "Diploma", "Bachelors Degree"];
 
 const facultyOptions = [
-    "FACULTY OF NATURAL SCIENCES",
-    "FACULTY OF MANAGEMENT SCIENCES",
-    "FACULTY OF ENGINEERING",
+    "Faculty of Natural Sciences",
+    "Faculty of Management Sciences",
+    "Faculty of Engineering",
+    "Faculty of Applied and Health Sciences"
 ];
 
 const languageOperatorOptions = ["both", "either"];
@@ -55,96 +56,18 @@ export default function AddCourseMUTPage() {
         qualificationLevel: "",
         duration: "",
         methodOfStudy: "Full-time",
-        careerChoices: [],
-        languageRequirementOperator: "both",
-        languageRequirements: [],
+        apsRequirement: "",
+        additionalRequirementsSpecialActive: false,
+        additionalRequirementsSpecialCount: 3,
+        additionalRequirementsSpecialMinPercentage: "",
+        additionalRequirementsSpecialIncludeLO: true,
         subjectRequirements: [],
         subjectRequirementGroups: [],
         subjectCombinationGroups: [],
+        languageRequirements: [],
+        careerChoices: [],
         additionalRequirements: [],
     });
-
-    const [errors, setErrors] = useState({});
-
-    // Fetch subjects on mount
-    useEffect(() => {
-        const fetchSubjects = async () => {
-            try {
-                const res = await fetch("/api/subjects");
-                if (!res.ok) throw new Error("Failed to fetch subjects");
-                const data = await res.json();
-                const sorted = (data || []).sort((a, b) =>
-                    a.name.localeCompare(b.name),
-                );
-                setSubjects(sorted);
-                setLanguageSubjects(
-                    sorted.filter((s) => s.isLanguage === true),
-                );
-            } catch (err) {
-                console.error("Failed to fetch subjects:", err);
-            }
-        };
-        fetchSubjects();
-    }, []);
-
-    const handleChange = (field, value) => {
-        setFormData((prev) => ({ ...prev, [field]: value }));
-        if (errors[field]) {
-            setErrors((prev) => ({ ...prev, [field]: null }));
-        }
-    };
-
-    // Language Requirements (UNIZULU pattern)
-    const addLanguageRequirement = () => {
-        setFormData((prev) => ({
-            ...prev,
-            languageRequirements: [
-                ...prev.languageRequirements,
-                { subjectId: "", homeLanguagePercentage: "", additionalLanguagePercentage: "" },
-            ],
-        }));
-    };
-
-    const updateLanguageRequirement = (index, key, value) => {
-        setFormData((prev) => ({
-            ...prev,
-            languageRequirements: prev.languageRequirements.map((item, i) =>
-                i === index ? { ...item, [key]: value } : item,
-            ),
-        }));
-    };
-
-    const removeLanguageRequirement = (index) => {
-        setFormData((prev) => ({
-            ...prev,
-            languageRequirements: prev.languageRequirements.filter((_, i) => i !== index),
-        }));
-    };
-
-    const getAvailableLanguageSubjects = (currentIdx) => {
-        const selectedIds = formData.languageRequirements
-            .map((req, idx) => (idx !== currentIdx ? req.subjectId : null))
-            .filter(Boolean);
-        return languageSubjects.filter((s) => !selectedIds.includes(s._id));
-    };
-
-    // Career Choices
-    const addCareerChoice = () => {
-        const trimmed = careerChoiceDraft.trim();
-        if (!trimmed) return;
-        setFormData((prev) => ({
-            ...prev,
-            careerChoices: [...prev.careerChoices, trimmed],
-        }));
-        setCareerChoiceDraft("");
-    };
-
-    const removeCareerChoice = (index) => {
-        setFormData((prev) => ({
-            ...prev,
-            careerChoices: prev.careerChoices.filter((_, i) => i !== index),
-        }));
-    };
 
     // Subject Requirements
     const addSubjectRequirement = () => {
@@ -384,6 +307,17 @@ export default function AddCourseMUTPage() {
                     : Number(v);
 
             const cleanData = {
+                apsRequirement: normInt(formData.apsRequirement),
+                additionalRequirementsSpecialActive:
+                    !!formData.additionalRequirementsSpecialActive,
+                additionalRequirementsSpecialCount: normInt(
+                    formData.additionalRequirementsSpecialCount,
+                ),
+                additionalRequirementsSpecialMinPercentage: normInt(
+                    formData.additionalRequirementsSpecialMinPercentage,
+                ),
+                additionalRequirementsSpecialIncludeLO:
+                    !!formData.additionalRequirementsSpecialIncludeLO,
                 courseName: formData.courseName,
                 courseCode: formData.courseCode,
                 faculty: formData.faculty,
@@ -400,9 +334,10 @@ export default function AddCourseMUTPage() {
                         homeLanguagePercentage: lr.homeLanguagePercentage
                             ? Number(lr.homeLanguagePercentage)
                             : undefined,
-                        additionalLanguagePercentage: lr.additionalLanguagePercentage
-                            ? Number(lr.additionalLanguagePercentage)
-                            : undefined,
+                        additionalLanguagePercentage:
+                            lr.additionalLanguagePercentage
+                                ? Number(lr.additionalLanguagePercentage)
+                                : undefined,
                     })),
                 subjectRequirements: formData.subjectRequirements
                     .filter((r) => r.subjectId && r.percentage)
@@ -622,7 +557,21 @@ export default function AddCourseMUTPage() {
                         </select>
                     </div>
 
-                    
+                    <div className={formStyles.fieldGroup}>
+                        <label className={formStyles.label}>
+                            APS Requirement (General)
+                        </label>
+                        <input
+                            type="number"
+                            value={formData.apsRequirement}
+                            onChange={(e) =>
+                                handleChange("apsRequirement", e.target.value)
+                            }
+                            className={formStyles.input}
+                            disabled={isLoading}
+                            min="0"
+                        />
+                    </div>
                 </div>
 
                 {/* Career Choices */}
@@ -714,10 +663,15 @@ export default function AddCourseMUTPage() {
                                         }
                                         className={formStyles.input}
                                     >
-                                        <option value="">-- select language --</option>
+                                        <option value="">
+                                            -- select language --
+                                        </option>
                                         {getAvailableLanguageSubjects(idx).map(
                                             (s) => (
-                                                <option key={s._id} value={s._id}>
+                                                <option
+                                                    key={s._id}
+                                                    value={s._id}
+                                                >
                                                     {s.name}
                                                 </option>
                                             ),
@@ -769,7 +723,9 @@ export default function AddCourseMUTPage() {
 
                                 <button
                                     type="button"
-                                    onClick={() => removeLanguageRequirement(idx)}
+                                    onClick={() =>
+                                        removeLanguageRequirement(idx)
+                                    }
                                     className={formStyles.removeBtn}
                                     disabled={isLoading}
                                     style={{ marginTop: "0.5rem" }}
@@ -1123,6 +1079,102 @@ export default function AddCourseMUTPage() {
                         Additional Requirements
                     </h2>
                     <div className={formStyles.arrayField}>
+                        <div style={{ marginBottom: "1rem" }}>
+                            <div className={formStyles.fieldGroup}>
+                                <label className={formStyles.label}>
+                                    <input
+                                        type="checkbox"
+                                        checked={
+                                            formData.additionalRequirementsSpecialActive
+                                        }
+                                        onChange={(e) =>
+                                            handleChange(
+                                                "additionalRequirementsSpecialActive",
+                                                e.target.checked,
+                                            )
+                                        }
+                                    />
+                                    &nbsp;Enable "Any N subjects (level 3)"
+                                    requirement
+                                </label>
+                            </div>
+
+                            {formData.additionalRequirementsSpecialActive && (
+                                <div
+                                    style={{
+                                        border: "1px solid #e5e7eb",
+                                        padding: "1rem",
+                                        borderRadius: "8px",
+                                        backgroundColor: "#ffffff",
+                                    }}
+                                >
+                                    <div className={formStyles.fieldGroup}>
+                                        <label className={formStyles.label}>
+                                            Number of subjects
+                                        </label>
+                                        <select
+                                            value={
+                                                formData.additionalRequirementsSpecialCount
+                                            }
+                                            onChange={(e) =>
+                                                handleChange(
+                                                    "additionalRequirementsSpecialCount",
+                                                    e.target.value,
+                                                )
+                                            }
+                                            className={formStyles.input}
+                                            disabled={isLoading}
+                                        >
+                                            {[1, 2, 3, 4, 5, 6].map((n) => (
+                                                <option key={n} value={n}>
+                                                    {n}
+                                                </option>
+                                            ))}
+                                        </select>
+                                    </div>
+
+                                    <div className={formStyles.fieldGroup}>
+                                        <label className={formStyles.label}>
+                                            Minimum % for those subjects
+                                        </label>
+                                        <input
+                                            type="number"
+                                            value={
+                                                formData.additionalRequirementsSpecialMinPercentage
+                                            }
+                                            onChange={(e) =>
+                                                handleChange(
+                                                    "additionalRequirementsSpecialMinPercentage",
+                                                    e.target.value,
+                                                )
+                                            }
+                                            className={formStyles.input}
+                                            min="0"
+                                            max="100"
+                                        />
+                                    </div>
+
+                                    <div className={formStyles.fieldGroup}>
+                                        <label className={formStyles.label}>
+                                            <input
+                                                type="checkbox"
+                                                checked={
+                                                    formData.additionalRequirementsSpecialIncludeLO
+                                                }
+                                                onChange={(e) =>
+                                                    handleChange(
+                                                        "additionalRequirementsSpecialIncludeLO",
+                                                        e.target.checked,
+                                                    )
+                                                }
+                                            />
+                                            &nbsp;Include LO in selection
+                                        </label>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+
                         {formData.additionalRequirements.map((req, idx) => (
                             <div
                                 key={idx}
