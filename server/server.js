@@ -11,6 +11,8 @@ dotenv.config();
 
 // starters
 const app = express();
+console.log("DEBUG: MONGO_URI is ->", process.env.MONGO_URI);
+
 
 // cors setup;
 

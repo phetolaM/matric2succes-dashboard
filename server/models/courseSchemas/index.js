@@ -9,6 +9,10 @@ import UNISACourseSchema from "./UNISACourseSchema.js";
 import UNIZULUCourseSchema from "./UNIZULUCourseSchema.js";
 import NMUCourseSchema from "./NMUCourseSchema.js";
 
+
+// new imports without AI
+import CPUTCourseSchema from "./CPUTCourseSchema.js";
+
 // Import more university schemas as you create them
 // import UCTCourseSchema from "./UCTCourseSchema.js";
 // import WITSCourseSchema from "./WITSCourseSchema.js";
@@ -22,10 +26,14 @@ export const universitySchemas = {
     wsu: WSUCourseSchema,
     tut: TUTCourseSchema,
     smu: SMUCourseSchema,
+    // cput: CPUTCourseSchema,
     mut: MUTCourseSchema,
     nmu: NMUCourseSchema,
     unisa: UNISACourseSchema,
     unizulu: UNIZULUCourseSchema,
+
+    // courses without AI
+    cput: CPUTCourseSchema,
     // up: UPCourseSchema,
     // uwc: UWCCourseSchema,
     // Add more universities here as you create their schemas

@@ -7,8 +7,8 @@ export const connectUniversityDB = async () => {
     try {
         await universityDbConnection.openUri(process.env.MONGO_URI, {
             dbName: "universityDataInformation",
-            useNewUrlParser: true,
-            useUnifiedTopology: true
+            // useNewUrlParser: true,
+            // useUnifiedTopology: true
         });
         console.log("✅ MongoDB connected to universityDataInformation database");
         return universityDbConnection;
