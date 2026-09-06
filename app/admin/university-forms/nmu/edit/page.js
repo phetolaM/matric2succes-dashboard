@@ -574,6 +574,7 @@ function EditCourseNMUContent() {
                         Basic Information
                     </h2>
 
+{/* course name */}
                     <div className={formStyles.fieldGroup}>
                         <label className={formStyles.label}>
                             Course Name{" "}
@@ -597,6 +598,7 @@ function EditCourseNMUContent() {
                         )}
                     </div>
 
+{/* faculty */}
                     <div className={formStyles.fieldGroup}>
                         <label className={formStyles.label}>Faculty</label>
                         <select
@@ -616,6 +618,7 @@ function EditCourseNMUContent() {
                         </select>
                     </div>
 
+{/* Majoring */}
                     <div className={formStyles.fieldGroup}>
                         <label className={formStyles.label}>Majoring</label>
                         <input
@@ -629,6 +632,7 @@ function EditCourseNMUContent() {
                         />
                     </div>
 
+{/* Qualification Level */}
                     <div className={formStyles.fieldGroup}>
                         <label className={formStyles.label}>
                             Qualification Level
@@ -649,6 +653,7 @@ function EditCourseNMUContent() {
                         </select>
                     </div>
 
+{/* Duration */}
                     <div className={formStyles.fieldGroup}>
                         <label className={formStyles.label}>Duration</label>
                         <select
@@ -668,6 +673,7 @@ function EditCourseNMUContent() {
                         </select>
                     </div>
 
+{/* Method of Study */}
                     <div className={formStyles.fieldGroup}>
                         <label className={formStyles.label}>
                             Method of Study

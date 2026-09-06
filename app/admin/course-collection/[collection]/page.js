@@ -28,36 +28,39 @@ const UNIVERSITIES_WITH_FORMS = [
     "tut",
     "ukzn",
     "unizulu",
+
+    // new forms without AI
+    "cput",
 ];
 
 const getUniversityDisplayName = (collectionName) => {
     const map = {
+        cput: "Cape Peninsula University of Technology",
+        cut: "Central University of Technology",
+        dut: "Durban University of Technology",
+        mut: "Mangosuthu University of Technology",
+        nwu: "North-West University",
+        nmu: "Nelson Mandela University",
+        smu: "Sefako Makgatho Health Sciences University",
+        spu: "Sol Plaatje University",
+        su: "Stellenbosch University",
+        ru: "Rhodes University",
+        tut: "Tshwane University of Technology",
         uj: "University of Johannesburg",
         up: "University of Pretoria",
         uwc: "University of the Western Cape",
-        wsu: "Walter Sisulu University",
         uct: "University of Cape Town",
         ufh: "University of Fort Hare",
         ufs: "University of the Free State",
         ukzn: "University of KwaZulu-Natal",
         ul: "University of Limpopo",
-        nwu: "North-West University",
-        ru: "Rhodes University",
-        smu: "Sefako Makgatho Health Sciences University",
-        su: "Stellenbosch University",
-        wits: "University of the Witwatersrand",
-        cput: "Cape Peninsula University of Technology",
-        cut: "Central University of Technology",
-        dut: "Durban University of Technology",
-        mut: "Mangosuthu University of Technology",
-        tut: "Tshwane University of Technology",
-        vut: "Vaal University of Technology",
-        nmu: "Nelson Mandela University",
         unisa: "University of South Africa",
         univen: "University of Venda",
         unizulu: "University of Zululand",
-        spu: "Sol Plaatje University",
         ump: "University of Mpumalanga",
+        vut: "Vaal University of Technology",
+        wits: "University of the Witwatersrand",
+        wsu: "Walter Sisulu University",
     };
 
     return map[collectionName] || collectionName?.toUpperCase() || "";

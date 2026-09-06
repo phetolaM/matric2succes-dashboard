@@ -1305,7 +1305,7 @@ function EditCourseMUTContent() {
                                             )
                                         }
                                     />
-                                    &nbsp;Enable "Any N subjects (level 3)"
+                                 &nbsp;Enable &quot;Any N subjects (level 3)&quot;
                                     requirement
                                 </label>
                             </div>

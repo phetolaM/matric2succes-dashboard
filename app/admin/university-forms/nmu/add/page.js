@@ -61,6 +61,7 @@ export default function AddCourseNMUPage() {
     const router = useRouter();
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState("");
+    const [errors, setErrors] = useState({});
     const [subjects, setSubjects] = useState([]);
     const [languageSubjects, setLanguageSubjects] = useState([]);
     const [noteDraft, setNoteDraft] = useState("");
@@ -85,7 +86,7 @@ export default function AddCourseNMUPage() {
         notApplicableSubjects: [],
     });
 
-    const [errors, setErrors] = useState({});
+   
 
     // Fetch subjects on mount
     useEffect(() => {
@@ -457,6 +458,7 @@ export default function AddCourseNMUPage() {
                         Basic Information
                     </h2>
 
+{/* Course Name */}
                     <div className={formStyles.fieldGroup}>
                         <label className={formStyles.label}>
                             Course Name{" "}
@@ -480,6 +482,7 @@ export default function AddCourseNMUPage() {
                         )}
                     </div>
 
+{/* Faculty */}
                     <div className={formStyles.fieldGroup}>
                         <label className={formStyles.label}>Faculty</label>
                         <select
@@ -498,7 +501,8 @@ export default function AddCourseNMUPage() {
                             ))}
                         </select>
                     </div>
-
+                    
+{/* Majoring */}
                     <div className={formStyles.fieldGroup}>
                         <label className={formStyles.label}>Majoring</label>
                         <input
@@ -512,6 +516,7 @@ export default function AddCourseNMUPage() {
                         />
                     </div>
 
+{/* Qualification Level */}
                     <div className={formStyles.fieldGroup}>
                         <label className={formStyles.label}>
                             Qualification Level
@@ -532,6 +537,7 @@ export default function AddCourseNMUPage() {
                         </select>
                     </div>
 
+                    {/* Duration */}
                     <div className={formStyles.fieldGroup}>
                         <label className={formStyles.label}>Duration</label>
                         <select
@@ -551,6 +557,7 @@ export default function AddCourseNMUPage() {
                         </select>
                     </div>
 
+                    {/* Method of Study */}
                     <div className={formStyles.fieldGroup}>
                         <label className={formStyles.label}>
                             Method of Study

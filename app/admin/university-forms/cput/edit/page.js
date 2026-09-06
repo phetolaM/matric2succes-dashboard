@@ -1,12 +1,12 @@
 "use client";
 
-import { useRouter } from "next/navigation";
-import { useState, useEffect } from "react";
-import { FiArrowLeft, FiPlus, FiX } from "react-icons/fi";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useState, useEffect, Suspense } from "react";
+import { FiArrowLeft, FiPlus, FiTrash2, FiX } from "react-icons/fi";
 import styles from "../../shared.module.css";
-import formStyles from "../MUTForm.module.css";
+import formStyles from "../CPUTForm.module.css";
 
-const UNIVERSITY_CODE = "mut";
+const UNIVERSITY_CODE = "cput";
 
 const durationOptions = [
     "6 months",
@@ -28,51 +28,67 @@ const methodOptions = [
     "Hybrid",
 ];
 
+ const APSCalculationMethod = [
+    "NSC Method",
+   "Method 1",
+   "Method 2",
+   "Method 3"
+    ];
+
 const levelOptions = ["Higher Certificate", "Diploma", "Bachelors Degree"];
 
 const facultyOptions = [
-    "Faculty of Natural Sciences",
-    "Faculty of Management Sciences",
-    "Faculty of Engineering",
-    "Faculty of Applied and Health Sciences"
+    "Faculty of Health & Wellness Sciences",
+    "Faculty of Education",
+    "Faculty of Business & Management Sciences",
+    "Faculty of Applied Sciences",
+    "Faculty of Informatics & Design",
+    "Faculty of Engineering & the Built Environment",
 ];
 
 const languageOperatorOptions = ["both", "either"];
 
 const emptyGroupItem = () => ({ subjectId: "", percentage: "" });
 
-export default function AddCourseMUTPage() {
+function EditCourseCPUTContent() {
     const router = useRouter();
+    const searchParams = useSearchParams();
+    const courseId = searchParams.get("id");
+
+    const [course, setCourse] = useState(null);
     const [isLoading, setIsLoading] = useState(false);
+    const [isDeleting, setIsDeleting] = useState(false);
+    const [isLoadingCourse, setIsLoadingCourse] = useState(true);
     const [error, setError] = useState("");
-      const [errors, setErrors] = useState({});
     const [subjects, setSubjects] = useState([]);
     const [languageSubjects, setLanguageSubjects] = useState([]);
     const [careerChoiceDraft, setCareerChoiceDraft] = useState("");
-    
+     const [noteDraft, setNoteDraft] = useState("");
 
-       const [formData, setFormData] = useState({
+    const [formData, setFormData] = useState({
         courseName: "",
-        courseCode: "",
+        // courseCode: "",
         faculty: "",
         qualificationLevel: "",
+        APSCalculationMethod:"",
         duration: "",
         methodOfStudy: "Full-time",
         apsRequirement: "",
-        additionalRequirementsSpecialActive: false,
-        additionalRequirementsSpecialCount: 3,
-        additionalRequirementsSpecialMinPercentage: "",
-        additionalRequirementsSpecialIncludeLO: true,
+        apsRequirementMathematics: "",
+        apsRequirementMathLit: "",
+        apsRequirementTechnicalMath: "",
+       
+        careerChoices: [],
+        languageRequirementOperator: "both",
+        languageRequirements: [],
         subjectRequirements: [],
         subjectRequirementGroups: [],
-        subjectCombinationGroups: [],
-        languageRequirements: [],
-        languageRequirementOperator: "both", // <-- add this
-        careerChoices: [],
-        additionalRequirements: [],
+
+         notes: [],
     });
 
-        // Fetch subjects on mount
+    const [errors, setErrors] = useState({});
+
     useEffect(() => {
         const fetchSubjects = async () => {
             try {
@@ -83,13 +99,74 @@ export default function AddCourseMUTPage() {
                     a.name.localeCompare(b.name),
                 );
                 setSubjects(sorted);
-                setLanguageSubjects(sorted.filter((s) => s.isLanguage === true));
+                setLanguageSubjects(
+                    sorted.filter((s) => s.isLanguage === true),
+                );
             } catch (err) {
                 console.error("Failed to fetch subjects:", err);
             }
         };
         fetchSubjects();
     }, []);
+
+    useEffect(() => {
+        if (courseId) {
+            fetchCourse();
+        }
+    }, [courseId]);
+
+    useEffect(() => {
+        if (course) {
+            setFormData({
+                courseName: course.courseName || "",
+                // courseCode: course.courseCode || "",
+                faculty: course.faculty || "",
+                qualificationLevel:
+                    course.qualificationLevel || course.level || "",
+                 apsRequirement: course.apsRequirement ?? "",
+                apsRequirementMathematics:
+                    course.apsRequirementMathematics ?? "",
+                apsRequirementMathLit: course.apsRequirementMathLit ?? "",
+                apsRequirementTechnicalMath:
+                    course.apsRequirementTechnicalMath ?? "",
+                duration: course.duration || "",
+                APSCalculationMethod: course.APSCalculationMethod || "",
+                methodOfStudy: course.methodOfStudy || "Full-time",
+                careerChoices: Array.isArray(course.careerChoices)
+                    ? course.careerChoices
+                    : [],
+                    notes: Array.isArray(course.notes)
+                    ? course.notes
+                    : course.notes
+                      ? [course.notes]
+                      : [],
+                // keep existing DB value but do not expose/edit in UI
+                // accessCourse is intentionally not shown in the form
+                languageRequirementOperator:
+                    course.languageRequirementOperator || "both",
+                languageRequirements: course.languageRequirements || [],
+                subjectRequirements: course.subjectRequirements || [],
+                subjectRequirementGroups: course.subjectRequirementGroups || [],
+            });
+        }
+    }, [course]);
+
+    const fetchCourse = async () => {
+        try {
+            setIsLoadingCourse(true);
+            const res = await fetch(
+                `/api/course-collections/${UNIVERSITY_CODE}?courseId=${courseId}`,
+            );
+            if (!res.ok) throw new Error("Course not found");
+            const data = await res.json();
+            setCourse(data);
+        } catch (err) {
+            console.error("Failed to fetch course:", err);
+            setError(err?.message || "Failed to load course");
+        } finally {
+            setIsLoadingCourse(false);
+        }
+    };
 
     const handleChange = (field, value) => {
         setFormData((prev) => ({ ...prev, [field]: value }));
@@ -98,25 +175,7 @@ export default function AddCourseMUTPage() {
         }
     };
 
-    // Career Choices
-    const addCareerChoice = () => {
-        const trimmed = careerChoiceDraft.trim();
-        if (!trimmed) return;
-        setFormData((prev) => ({
-            ...prev,
-            careerChoices: [...prev.careerChoices, trimmed],
-        }));
-        setCareerChoiceDraft("");
-    };
-
-    const removeCareerChoice = (index) => {
-        setFormData((prev) => ({
-            ...prev,
-            careerChoices: prev.careerChoices.filter((_, i) => i !== index),
-        }));
-    };
-
-    // Language Requirements
+    // Language Requirements (UNIZULU pattern)
     const addLanguageRequirement = () => {
         setFormData((prev) => ({
             ...prev,
@@ -154,6 +213,24 @@ export default function AddCourseMUTPage() {
             .map((req, idx) => (idx !== currentIdx ? req.subjectId : null))
             .filter(Boolean);
         return languageSubjects.filter((s) => !selectedIds.includes(s._id));
+    };
+
+    // Career Choices
+    const addCareerChoice = () => {
+        const trimmed = careerChoiceDraft.trim();
+        if (!trimmed) return;
+        setFormData((prev) => ({
+            ...prev,
+            careerChoices: [...prev.careerChoices, trimmed],
+        }));
+        setCareerChoiceDraft("");
+    };
+
+    const removeCareerChoice = (index) => {
+        setFormData((prev) => ({
+            ...prev,
+            careerChoices: prev.careerChoices.filter((_, i) => i !== index),
+        }));
     };
 
     // Subject Requirements
@@ -270,111 +347,17 @@ export default function AddCourseMUTPage() {
     };
 
     // Subject Combination Groups
-    const addCombinationGroup = () => {
-        setFormData((prev) => ({
-            ...prev,
-            subjectCombinationGroups: [
-                ...prev.subjectCombinationGroups,
-                [emptyGroupItem()],
-            ],
-        }));
-    };
-
-    const addCombinationItem = (groupIdx) => {
-        setFormData((prev) => ({
-            ...prev,
-            subjectCombinationGroups: prev.subjectCombinationGroups.map(
-                (group, i) =>
-                    i === groupIdx ? [...group, emptyGroupItem()] : group,
-            ),
-        }));
-    };
-
-    const updateCombinationItem = (groupIdx, itemIdx, key, value) => {
-        setFormData((prev) => ({
-            ...prev,
-            subjectCombinationGroups: prev.subjectCombinationGroups.map(
-                (group, i) =>
-                    i === groupIdx
-                        ? group.map((item, j) =>
-                              j === itemIdx ? { ...item, [key]: value } : item,
-                          )
-                        : group,
-            ),
-        }));
-    };
-
-    const removeCombinationItem = (groupIdx, itemIdx) => {
-        setFormData((prev) => ({
-            ...prev,
-            subjectCombinationGroups: prev.subjectCombinationGroups.map(
-                (group, i) =>
-                    i === groupIdx
-                        ? group.filter((_, j) => j !== itemIdx)
-                        : group,
-            ),
-        }));
-    };
-
-    const removeCombinationGroup = (groupIdx) => {
-        setFormData((prev) => ({
-            ...prev,
-            subjectCombinationGroups: prev.subjectCombinationGroups.filter(
-                (_, i) => i !== groupIdx,
-            ),
-        }));
-    };
-
-    const getAvailableSubjectsForCombination = (groupIdx, itemIdx) => {
-        const selectedInAND = formData.subjectRequirements
-            .map((req) => req.subjectId)
-            .filter(Boolean);
-
-        const selectedInCurrentGroup =
-            formData.subjectCombinationGroups[groupIdx]
-                ?.map((item, idx) => (idx !== itemIdx ? item.subjectId : null))
-                .filter(Boolean) || [];
-
-        const allSelected = [...selectedInAND, ...selectedInCurrentGroup];
-        return subjects.filter((s) => !allSelected.includes(s._id));
-    };
-
-    // Additional Requirements
-    const addAdditionalRequirement = () => {
-        setFormData((prev) => ({
-            ...prev,
-            additionalRequirements: [
-                ...prev.additionalRequirements,
-                { description: "", subjectId: "", percentage: "" },
-            ],
-        }));
-    };
-
-    const updateAdditionalRequirement = (index, key, value) => {
-        setFormData((prev) => ({
-            ...prev,
-            additionalRequirements: prev.additionalRequirements.map(
-                (item, i) => (i === index ? { ...item, [key]: value } : item),
-            ),
-        }));
-    };
-
-    const removeAdditionalRequirement = (index) => {
-        setFormData((prev) => ({
-            ...prev,
-            additionalRequirements: prev.additionalRequirements.filter(
-                (_, i) => i !== index,
-            ),
-        }));
-    };
 
     const validate = () => {
         const newErrors = {};
         if (!formData.courseName?.trim()) {
             newErrors.courseName = "Course name is required";
         }
-        if (!formData.courseCode?.trim()) {
-            newErrors.courseCode = "Course code is required";
+        // if (!formData.courseCode?.trim()) {
+        //     newErrors.courseCode = "Course code is required";
+        // }
+        if (!formData.APSCalculationMethod?.trim()) {
+            newErrors.APSCalculationMethod = "APS calculation method is required";
         }
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
@@ -383,6 +366,11 @@ export default function AddCourseMUTPage() {
     const handleSubmit = async (e) => {
         e.preventDefault();
         if (!validate()) return;
+
+        if (!courseId) {
+            setError("Course ID is missing. Please reload the page.");
+            return;
+        }
 
         try {
             setIsLoading(true);
@@ -394,36 +382,36 @@ export default function AddCourseMUTPage() {
                     : Number(v);
 
             const cleanData = {
-                apsRequirement: normInt(formData.apsRequirement),
-                additionalRequirementsSpecialActive:
-                    !!formData.additionalRequirementsSpecialActive,
-                additionalRequirementsSpecialCount: normInt(
-                    formData.additionalRequirementsSpecialCount,
+                notes: formData.notes.filter((n) => n.trim()),
+              apsRequirement: normInt(formData.apsRequirement),
+                apsRequirementMathematics: normInt(
+                    formData.apsRequirementMathematics,
                 ),
-                additionalRequirementsSpecialMinPercentage: normInt(
-                    formData.additionalRequirementsSpecialMinPercentage,
+                apsRequirementMathLit: normInt(formData.apsRequirementMathLit),
+                apsRequirementTechnicalMath: normInt(
+                    formData.apsRequirementTechnicalMath,
                 ),
-                additionalRequirementsSpecialIncludeLO:
-                    !!formData.additionalRequirementsSpecialIncludeLO,
                 courseName: formData.courseName,
-                courseCode: formData.courseCode,
+                // courseCode: formData.courseCode,
                 faculty: formData.faculty,
                 qualificationLevel: formData.qualificationLevel,
                 duration: formData.duration,
+                APSCalculationMethod: formData.APSCalculationMethod,
                 methodOfStudy: formData.methodOfStudy,
                 careerChoices: formData.careerChoices.filter((c) => c.trim()),
+                accessCourse: formData.accessCourse,
                 languageRequirementOperator:
                     formData.languageRequirementOperator,
                 languageRequirements: formData.languageRequirements
-                    .filter((lr) => lr.subjectId)
-                    .map((lr) => ({
-                        subjectId: lr.subjectId,
-                        homeLanguagePercentage: lr.homeLanguagePercentage
-                            ? Number(lr.homeLanguagePercentage)
+                    .filter((r) => r.subjectId)
+                    .map((r) => ({
+                        subjectId: r.subjectId,
+                        homeLanguagePercentage: r.homeLanguagePercentage
+                            ? Number(r.homeLanguagePercentage)
                             : undefined,
                         additionalLanguagePercentage:
-                            lr.additionalLanguagePercentage
-                                ? Number(lr.additionalLanguagePercentage)
+                            r.additionalLanguagePercentage
+                                ? Number(r.additionalLanguagePercentage)
                                 : undefined,
                     })),
                 subjectRequirements: formData.subjectRequirements
@@ -441,28 +429,12 @@ export default function AddCourseMUTPage() {
                                 percentage: Number(item.percentage),
                             })),
                 ),
-                subjectCombinationGroups: formData.subjectCombinationGroups.map(
-                    (group) =>
-                        group
-                            .filter((item) => item.subjectId && item.percentage)
-                            .map((item) => ({
-                                subjectId: item.subjectId,
-                                percentage: Number(item.percentage),
-                            })),
-                ),
-                additionalRequirements: formData.additionalRequirements
-                    .filter((r) => r.description?.trim() || r.subjectId)
-                    .map((r) => ({
-                        description: r.description || "",
-                        subjectId: r.subjectId || undefined,
-                        percentage: normInt(r.percentage),
-                    })),
             };
 
             const res = await fetch(
-                `/api/course-collections/${UNIVERSITY_CODE}`,
+                `/api/course-collections/${UNIVERSITY_CODE}/${courseId}`,
                 {
-                    method: "POST",
+                    method: "PUT",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify(cleanData),
                 },
@@ -478,10 +450,62 @@ export default function AddCourseMUTPage() {
             router.push(`/admin/course-collection/${UNIVERSITY_CODE}`);
         } catch (err) {
             console.error("Failed:", err);
-            setError(err?.message || "Failed to create course");
+            setError(err?.message || "Failed to update course");
             setIsLoading(false);
         }
     };
+
+    const handleDeleteCourse = async () => {
+        if (!courseId) {
+            setError("Course ID is missing. Please reload the page.");
+            return;
+        }
+
+        const confirmed = window.confirm(
+            "Are you sure you want to delete this course? This action cannot be undone.",
+        );
+        if (!confirmed) return;
+
+        try {
+            setIsDeleting(true);
+            setError("");
+
+            const res = await fetch(
+                `/api/course-collections/${UNIVERSITY_CODE}/${courseId}`,
+                { method: "DELETE" },
+            );
+
+            if (!res.ok) {
+                const apiError = await res.json().catch(() => ({}));
+                throw new Error(
+                    apiError?.message ||
+                        `API Error: ${res.status} ${res.statusText}`,
+                );
+            }
+
+            router.push(`/admin/course-collection/${UNIVERSITY_CODE}`);
+        } catch (err) {
+            console.error("Failed to delete course:", err);
+            setError(err?.message || "Failed to delete course");
+            setIsDeleting(false);
+        }
+    };
+
+    if (isLoadingCourse) {
+        return (
+            <div className={styles.container}>
+                <p>Loading course...</p>
+            </div>
+        );
+    }
+
+    if (!course) {
+        return (
+            <div className={styles.container}>
+                <p className={styles.error}>{error || "Course not found"}</p>
+            </div>
+        );
+    }
 
     return (
         <div className={styles.container}>
@@ -495,9 +519,9 @@ export default function AddCourseMUTPage() {
                     Back
                 </button>
                 <div>
-                    <p className={styles.label}>Add Course</p>
+                    <p className={styles.label}>Edit Course</p>
                     <h1 className={styles.title}>
-                        Mangosuthu University of Technology
+                        Cape Peninsula University of Technology
                     </h1>
                 </div>
             </header>
@@ -514,6 +538,7 @@ export default function AddCourseMUTPage() {
                         Basic Information
                     </h2>
 
+{/* Course Name */}
                     <div className={formStyles.fieldGroup}>
                         <label className={formStyles.label}>
                             Course Name{" "}
@@ -537,7 +562,8 @@ export default function AddCourseMUTPage() {
                         )}
                     </div>
 
-                    <div className={formStyles.fieldGroup}>
+{/* Course Code */}
+                    {/* <div className={formStyles.fieldGroup}>
                         <label className={formStyles.label}>
                             Course Code{" "}
                             <span className={formStyles.required}>*</span>
@@ -558,8 +584,9 @@ export default function AddCourseMUTPage() {
                                 {errors.courseCode}
                             </p>
                         )}
-                    </div>
+                    </div> */}
 
+{/* Faculty */}
                     <div className={formStyles.fieldGroup}>
                         <label className={formStyles.label}>Faculty</label>
                         <select
@@ -579,6 +606,7 @@ export default function AddCourseMUTPage() {
                         </select>
                     </div>
 
+{/* Qualification Level */}
                     <div className={formStyles.fieldGroup}>
                         <label className={formStyles.label}>
                             Qualification Level
@@ -605,6 +633,7 @@ export default function AddCourseMUTPage() {
                         </select>
                     </div>
 
+{/* Duration */}
                     <div className={formStyles.fieldGroup}>
                         <label className={formStyles.label}>Duration</label>
                         <select
@@ -624,6 +653,27 @@ export default function AddCourseMUTPage() {
                         </select>
                     </div>
 
+                    {/* APS Calculation Method */}
+                    <div className={formStyles.fieldGroup}>
+                        <label className={formStyles.label}>APS Calculation Method</label>
+                        <select
+                            value={formData.APSCalculationMethod}
+                            onChange={(e) =>
+                                handleChange("APSCalculationMethod", e.target.value)
+                            }
+                            className={formStyles.input}
+                            disabled={isLoading}
+                        >
+                            <option value="">-- select APS calculation method --</option>
+                            {APSCalculationMethod.map((method) => (
+                                <option key={method} value={method}>
+                                    {method}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
+
+{/* Method of Study */}
                     <div className={formStyles.fieldGroup}>
                         <label className={formStyles.label}>
                             Method of Study
@@ -643,23 +693,87 @@ export default function AddCourseMUTPage() {
                             ))}
                         </select>
                     </div>
-
-                    <div className={formStyles.fieldGroup}>
-                        <label className={formStyles.label}>
-                            APS Requirement (General)
-                        </label>
-                        <input
-                            type="number"
-                            value={formData.apsRequirement}
-                            onChange={(e) =>
-                                handleChange("apsRequirement", e.target.value)
-                            }
-                            className={formStyles.input}
-                            disabled={isLoading}
-                            min="0"
-                        />
-                    </div>
                 </div>
+
+                {/* APS Requirements */}
+                              <div className={formStyles.section}>
+                                  <h2 className={formStyles.sectionTitle}>
+                                      APS Requirements
+                                  </h2>
+              
+                                  <div className={formStyles.fieldGroup}>
+                                      <label className={formStyles.label}>
+                                          APS Requirement (General)
+                                      </label>
+                                      <input
+                                          type="number"
+                                          value={formData.apsRequirement}
+                                          onChange={(e) =>
+                                              handleChange("apsRequirement", e.target.value)
+                                          }
+                                          className={formStyles.input}
+                                          disabled={isLoading}
+                                          min="0"
+                                      />
+                                  </div>
+              
+                                  <div className={formStyles.fieldGroup}>
+                                      <label className={formStyles.label}>
+                                          APS with Mathematics
+                                      </label>
+                                      <input
+                                          type="number"
+                                          value={formData.apsRequirementMathematics}
+                                          onChange={(e) =>
+                                              handleChange(
+                                                  "apsRequirementMathematics",
+                                                  e.target.value,
+                                              )
+                                          }
+                                          className={formStyles.input}
+                                          disabled={isLoading}
+                                          min="0"
+                                      />
+                                  </div>
+              
+                                  <div className={formStyles.fieldGroup}>
+                                      <label className={formStyles.label}>
+                                          APS with Math Literacy
+                                      </label>
+                                      <input
+                                          type="number"
+                                          value={formData.apsRequirementMathLit}
+                                          onChange={(e) =>
+                                              handleChange(
+                                                  "apsRequirementMathLit",
+                                                  e.target.value,
+                                              )
+                                          }
+                                          className={formStyles.input}
+                                          disabled={isLoading}
+                                          min="0"
+                                      />
+                                  </div>
+              
+                                  <div className={formStyles.fieldGroup}>
+                                      <label className={formStyles.label}>
+                                          APS with Technical Mathematics
+                                      </label>
+                                      <input
+                                          type="number"
+                                          value={formData.apsRequirementTechnicalMath}
+                                          onChange={(e) =>
+                                              handleChange(
+                                                  "apsRequirementTechnicalMath",
+                                                  e.target.value,
+                                              )
+                                          }
+                                          className={formStyles.input}
+                                          disabled={isLoading}
+                                          min="0"
+                                      />
+                                  </div>
+                              </div>
 
                 {/* Career Choices */}
                 <div className={formStyles.section}>
@@ -707,6 +821,64 @@ export default function AddCourseMUTPage() {
                         </div>
                     </div>
                 </div>
+
+                 {/* Notes */}
+                                <div className={formStyles.section}>
+                                    <h2 className={formStyles.sectionTitle}>Notes</h2>
+                                    <div className={formStyles.arrayField}>
+                                        {formData.notes.map((note, idx) => (
+                                            <div key={idx} className={formStyles.arrayItem}>
+                                                <div
+                                                    className={formStyles.input}
+                                                    style={{ display: "block" }}
+                                                >
+                                                    {note}
+                                                </div>
+                                                <button
+                                                    type="button"
+                                                    onClick={() =>
+                                                        setFormData((prev) => ({
+                                                            ...prev,
+                                                            notes: prev.notes.filter(
+                                                                (_, i) => i !== idx,
+                                                            ),
+                                                        }))
+                                                    }
+                                                    className={formStyles.removeBtn}
+                                                    disabled={isLoading}
+                                                >
+                                                    <FiX />
+                                                </button>
+                                            </div>
+                                        ))}
+                                        <div className={formStyles.arrayItem}>
+                                            <input
+                                                type="text"
+                                                value={noteDraft}
+                                                onChange={(e) => setNoteDraft(e.target.value)}
+                                                className={formStyles.input}
+                                                disabled={isLoading}
+                                                placeholder="- Bullet point"
+                                            />
+                                            <button
+                                                type="button"
+                                                onClick={() => {
+                                                    const trimmed = noteDraft.trim();
+                                                    if (!trimmed) return;
+                                                    setFormData((prev) => ({
+                                                        ...prev,
+                                                        notes: [...prev.notes, trimmed],
+                                                    }));
+                                                    setNoteDraft("");
+                                                }}
+                                                className={formStyles.addBtn}
+                                                disabled={isLoading || !noteDraft.trim()}
+                                            >
+                                                <FiPlus /> Add Note
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
 
                 {/* Language Requirements */}
                 <div className={formStyles.section}>
@@ -1033,346 +1205,40 @@ export default function AddCourseMUTPage() {
                     </button>
                 </div>
 
-                {/* Subject Combination Groups */}
-                <div className={formStyles.section}>
-                    <h2 className={formStyles.sectionTitle}>
-                        Subject Combination Groups
-                    </h2>
-                    <p
-                        style={{
-                            fontSize: "0.9em",
-                            color: "#666",
-                            marginBottom: "1rem",
-                        }}
-                    >
-                        Student must select a valid combination from each group
-                    </p>
-                    {formData.subjectCombinationGroups.map((group, gIdx) => (
-                        <div
-                            key={gIdx}
-                            style={{
-                                border: "2px solid #7c2d12",
-                                padding: "1.5rem",
-                                marginBottom: "1.5rem",
-                                borderRadius: "8px",
-                                backgroundColor: "#fef2f2",
-                            }}
-                        >
-                            <h4
-                                style={{
-                                    color: "#7c2d12",
-                                    marginBottom: "1rem",
-                                }}
-                            >
-                                Combination #{gIdx + 1}
-                            </h4>
-                            <div className={formStyles.arrayField}>
-                                {group.map((item, iIdx) => (
-                                    <div
-                                        key={iIdx}
-                                        className={formStyles.arrayItem}
-                                    >
-                                        <select
-                                            value={item.subjectId}
-                                            onChange={(e) =>
-                                                updateCombinationItem(
-                                                    gIdx,
-                                                    iIdx,
-                                                    "subjectId",
-                                                    e.target.value,
-                                                )
-                                            }
-                                            className={formStyles.input}
-                                        >
-                                            <option value="">
-                                                -- select subject --
-                                            </option>
-                                            {getAvailableSubjectsForCombination(
-                                                gIdx,
-                                                iIdx,
-                                            ).map((s) => (
-                                                <option
-                                                    key={s._id}
-                                                    value={s._id}
-                                                >
-                                                    {s.name}
-                                                </option>
-                                            ))}
-                                        </select>
-                                        <input
-                                            type="number"
-                                            placeholder="%"
-                                            value={item.percentage}
-                                            onChange={(e) =>
-                                                updateCombinationItem(
-                                                    gIdx,
-                                                    iIdx,
-                                                    "percentage",
-                                                    e.target.value,
-                                                )
-                                            }
-                                            className={formStyles.input}
-                                            min="0"
-                                            max="100"
-                                        />
-                                        <button
-                                            type="button"
-                                            onClick={() =>
-                                                removeCombinationItem(
-                                                    gIdx,
-                                                    iIdx,
-                                                )
-                                            }
-                                            className={formStyles.removeBtn}
-                                            disabled={isLoading}
-                                        >
-                                            <FiX />
-                                        </button>
-                                    </div>
-                                ))}
-                                <button
-                                    type="button"
-                                    onClick={() => addCombinationItem(gIdx)}
-                                    className={formStyles.addBtn}
-                                    disabled={isLoading}
-                                >
-                                    <FiPlus /> Add item to combination
-                                </button>
-                            </div>
-                            <button
-                                type="button"
-                                onClick={() => removeCombinationGroup(gIdx)}
-                                className={formStyles.removeBtn}
-                                disabled={isLoading}
-                                style={{ marginTop: "1rem" }}
-                            >
-                                <FiX /> Remove Combination
-                            </button>
-                        </div>
-                    ))}
-                    <button
-                        type="button"
-                        onClick={addCombinationGroup}
-                        className={formStyles.addBtn}
-                        disabled={isLoading}
-                    >
-                        <FiPlus /> Add Combination Group
-                    </button>
-                </div>
-
-                {/* Additional Requirements */}
-                <div className={formStyles.section}>
-                    <h2 className={formStyles.sectionTitle}>
-                        Additional Requirements
-                    </h2>
-                    <div className={formStyles.arrayField}>
-                        <div style={{ marginBottom: "1rem" }}>
-                            <div className={formStyles.fieldGroup}>
-                                <label className={formStyles.label}>
-                                    <input
-                                        type="checkbox"
-                                        checked={
-                                            formData.additionalRequirementsSpecialActive
-                                        }
-                                        onChange={(e) =>
-                                            handleChange(
-                                                "additionalRequirementsSpecialActive",
-                                                e.target.checked,
-                                            )
-                                        }
-                                    />
-                                  &nbsp;Enable &quot;Any N subjects (level 3)&quot;
-                                    requirement
-                                </label>
-                            </div>
-
-                            {formData.additionalRequirementsSpecialActive && (
-                                <div
-                                    style={{
-                                        border: "1px solid #e5e7eb",
-                                        padding: "1rem",
-                                        borderRadius: "8px",
-                                        backgroundColor: "#ffffff",
-                                    }}
-                                >
-                                    <div className={formStyles.fieldGroup}>
-                                        <label className={formStyles.label}>
-                                            Number of subjects
-                                        </label>
-                                        <select
-                                            value={
-                                                formData.additionalRequirementsSpecialCount
-                                            }
-                                            onChange={(e) =>
-                                                handleChange(
-                                                    "additionalRequirementsSpecialCount",
-                                                    e.target.value,
-                                                )
-                                            }
-                                            className={formStyles.input}
-                                            disabled={isLoading}
-                                        >
-                                            {[1, 2, 3, 4, 5, 6].map((n) => (
-                                                <option key={n} value={n}>
-                                                    {n}
-                                                </option>
-                                            ))}
-                                        </select>
-                                    </div>
-
-                                    <div className={formStyles.fieldGroup}>
-                                        <label className={formStyles.label}>
-                                            Minimum % for those subjects
-                                        </label>
-                                        <input
-                                            type="number"
-                                            value={
-                                                formData.additionalRequirementsSpecialMinPercentage
-                                            }
-                                            onChange={(e) =>
-                                                handleChange(
-                                                    "additionalRequirementsSpecialMinPercentage",
-                                                    e.target.value,
-                                                )
-                                            }
-                                            className={formStyles.input}
-                                            min="0"
-                                            max="100"
-                                        />
-                                    </div>
-
-                                    <div className={formStyles.fieldGroup}>
-                                        <label className={formStyles.label}>
-                                            <input
-                                                type="checkbox"
-                                                checked={
-                                                    formData.additionalRequirementsSpecialIncludeLO
-                                                }
-                                                onChange={(e) =>
-                                                    handleChange(
-                                                        "additionalRequirementsSpecialIncludeLO",
-                                                        e.target.checked,
-                                                    )
-                                                }
-                                            />
-                                            &nbsp;Include LO in selection
-                                        </label>
-                                    </div>
-                                </div>
-                            )}
-                        </div>
-
-                        {formData.additionalRequirements.map((req, idx) => (
-                            <div
-                                key={idx}
-                                style={{
-                                    border: "1px solid #d1d5db",
-                                    padding: "1rem",
-                                    marginBottom: "1rem",
-                                    borderRadius: "8px",
-                                    backgroundColor: "#f9fafb",
-                                }}
-                            >
-                                <div className={formStyles.fieldGroup}>
-                                    <label className={formStyles.label}>
-                                        Description
-                                    </label>
-                                    <input
-                                        type="text"
-                                        value={req.description}
-                                        onChange={(e) =>
-                                            updateAdditionalRequirement(
-                                                idx,
-                                                "description",
-                                                e.target.value,
-                                            )
-                                        }
-                                        className={formStyles.input}
-                                        placeholder="Requirement description"
-                                    />
-                                </div>
-
-                                <div className={formStyles.fieldGroup}>
-                                    <label className={formStyles.label}>
-                                        Subject (Optional)
-                                    </label>
-                                    <select
-                                        value={req.subjectId}
-                                        onChange={(e) =>
-                                            updateAdditionalRequirement(
-                                                idx,
-                                                "subjectId",
-                                                e.target.value,
-                                            )
-                                        }
-                                        className={formStyles.input}
-                                    >
-                                        <option value="">
-                                            -- select subject --
-                                        </option>
-                                        {subjects.map((s) => (
-                                            <option key={s._id} value={s._id}>
-                                                {s.name}
-                                            </option>
-                                        ))}
-                                    </select>
-                                </div>
-
-                                <div className={formStyles.fieldGroup}>
-                                    <label className={formStyles.label}>
-                                        Percentage (Optional)
-                                    </label>
-                                    <input
-                                        type="number"
-                                        value={req.percentage}
-                                        onChange={(e) =>
-                                            updateAdditionalRequirement(
-                                                idx,
-                                                "percentage",
-                                                e.target.value,
-                                            )
-                                        }
-                                        className={formStyles.input}
-                                        min="0"
-                                        max="100"
-                                    />
-                                </div>
-
-                                <button
-                                    type="button"
-                                    onClick={() =>
-                                        removeAdditionalRequirement(idx)
-                                    }
-                                    className={formStyles.removeBtn}
-                                    disabled={isLoading}
-                                    style={{ marginTop: "0.5rem" }}
-                                >
-                                    <FiX /> Remove Requirement
-                                </button>
-                            </div>
-                        ))}
-                        <button
-                            type="button"
-                            onClick={addAdditionalRequirement}
-                            className={formStyles.addBtn}
-                            disabled={isLoading}
-                        >
-                            <FiPlus /> Add Additional Requirement
-                        </button>
-                    </div>
-                </div>
-
                 {/* Submit */}
                 <div className={formStyles.actions}>
                     <button
+                        type="button"
+                        onClick={handleDeleteCourse}
+                        disabled={isLoading || isDeleting}
+                        className={formStyles.deleteBtn}
+                    >
+                        <FiTrash2 />
+                        {isDeleting ? "Deleting..." : "Delete Course"}
+                    </button>
+                    <button
                         type="submit"
-                        disabled={isLoading}
+                        disabled={isLoading || isDeleting}
                         className={formStyles.submitBtn}
                     >
-                        {isLoading ? "Creating..." : "Create Course"}
+                        {isLoading ? "Updating..." : "Update Course"}
                     </button>
                 </div>
             </form>
         </div>
+    );
+}
+
+export default function EditCourseCPUTPage() {
+    return (
+        <Suspense
+            fallback={
+                <div style={{ padding: "2rem", textAlign: "center" }}>
+                    Loading...
+                </div>
+            }
+        >
+            <EditCourseCPUTContent />
+        </Suspense>
     );
 }
