@@ -31,10 +31,11 @@ const methodOptions = [
 const levelOptions = ["Higher Certificate", "Diploma", "Bachelors Degree"];
 
 const facultyOptions = [
-    "Faculty of Natural Sciences",
+    "Faculty of Accounting and Informatics",
+    "Faculty of Arts and Design",
+    "Faculty of Engineering and The Build Environment",
+    "Faculty Health Sciences",
     "Faculty of Management Sciences",
-    "Faculty of Engineering",
-    "Faculty of Applied and Health Sciences",
 ];
 
 const languageOperatorOptions = ["both", "either"];
@@ -589,7 +590,7 @@ additionalRequirementsSpecialLanguageRule:
                 <div>
                     <p className={styles.label}>Edit Course</p>
                     <h1 className={styles.title}>
-                        Mangosuthu University of Technology
+                       Durban University of Technology
                     </h1>
                 </div>
             </header>
