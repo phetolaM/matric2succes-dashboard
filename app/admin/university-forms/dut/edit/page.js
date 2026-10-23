@@ -56,27 +56,28 @@ function EditCourseDUTContent() {
     const [languageSubjects, setLanguageSubjects] = useState([]);
     const [careerChoiceDraft, setCareerChoiceDraft] = useState("");
 
-   const [formData, setFormData] = useState({
-    courseName: "",
-    courseCode: "",
-    faculty: "",
-    qualificationLevel: "",
-    duration: "",
-    methodOfStudy: "Full-time",
-    apsRequirement: "",
-    careerChoices: [],
-    languageRequirementOperator: "both",
-    languageRequirements: [],
-    subjectRequirements: [],
-    subjectRequirementGroups: [],
-    subjectCombinationGroups: [],
+    const [formData, setFormData] = useState({
+        courseName: "",
+        courseCode: "",
+        faculty: "",
+        qualificationLevel: "",
+        duration: "",
+        methodOfStudy: "Full-time",
+        apsRequirement: "",
+        careerChoices: [],
+        languageRequirementOperator: "both",
+        languageRequirements: [],
+        subjectRequirements: [],
+        subjectRequirementGroups: [],
+        subjectCombinationGroups: [],
+        notes: [],
 
-    additionalRequirementsSpecialActive: false,
-    additionalRequirementsSpecialCount: 3,
-    additionalRequirementsSpecialMinPercentage: "",
-    additionalRequirementsSpecialIncludeLO: false,
-    additionalRequirementsSpecialLanguageRule: "max1",
-});
+        additionalRequirementsSpecialActive: false,
+        additionalRequirementsSpecialCount: 3,
+        additionalRequirementsSpecialMinPercentage: "",
+        additionalRequirementsSpecialIncludeLO: false,
+        additionalRequirementsSpecialLanguageRule: "max1",
+    });
 
     const [errors, setErrors] = useState({});
 
@@ -116,17 +117,23 @@ function EditCourseDUTContent() {
                     course.qualificationLevel || course.level || "",
                 apsRequirement: course.apsRequirement || course.aps || "",
 
-               additionalRequirementsSpecialActive:
-    course.additionalRequirementsSpecialActive ?? false,
-additionalRequirementsSpecialCount:
-    course.additionalRequirementsSpecialCount ?? 3,
-additionalRequirementsSpecialMinPercentage:
-    course.additionalRequirementsSpecialMinPercentage ?? "",
-additionalRequirementsSpecialIncludeLO:
-    course.additionalRequirementsSpecialIncludeLO ?? false,
-// old courses had no language cap, so they load as "any"
-additionalRequirementsSpecialLanguageRule:
-    course.additionalRequirementsSpecialLanguageRule ?? "any",
+                notes: Array.isArray(course.notes)
+                    ? course.notes
+                    : course.notes
+                      ? [course.notes]
+                      : [],
+
+                additionalRequirementsSpecialActive:
+                    course.additionalRequirementsSpecialActive ?? false,
+                additionalRequirementsSpecialCount:
+                    course.additionalRequirementsSpecialCount ?? 3,
+                additionalRequirementsSpecialMinPercentage:
+                    course.additionalRequirementsSpecialMinPercentage ?? "",
+                additionalRequirementsSpecialIncludeLO:
+                    course.additionalRequirementsSpecialIncludeLO ?? false,
+                // old courses had no language cap, so they load as "any"
+                additionalRequirementsSpecialLanguageRule:
+                    course.additionalRequirementsSpecialLanguageRule ?? "any",
                 duration: course.duration || "",
                 methodOfStudy: course.methodOfStudy || "Full-time",
                 careerChoices: Array.isArray(course.careerChoices)
@@ -438,6 +445,7 @@ additionalRequirementsSpecialLanguageRule:
                     : Number(v);
 
             const cleanData = {
+                  notes: formData.notes.filter((n) => n.trim()),
                 apsRequirement: normInt(formData.apsRequirement),
                 additionalRequirementsSpecialActive:
                     !!formData.additionalRequirementsSpecialActive,
@@ -494,10 +502,10 @@ additionalRequirementsSpecialLanguageRule:
                                 percentage: Number(item.percentage),
                             })),
                 ),
-                    additionalRequirementsSpecialLanguageRule:
-    formData.additionalRequirementsSpecialActive
-        ? formData.additionalRequirementsSpecialLanguageRule
-        : undefined,
+                additionalRequirementsSpecialLanguageRule:
+                    formData.additionalRequirementsSpecialActive
+                        ? formData.additionalRequirementsSpecialLanguageRule
+                        : undefined,
             };
 
             const res = await fetch(
@@ -590,7 +598,7 @@ additionalRequirementsSpecialLanguageRule:
                 <div>
                     <p className={styles.label}>Edit Course</p>
                     <h1 className={styles.title}>
-                       Durban University of Technology
+                        Durban University of Technology
                     </h1>
                 </div>
             </header>
@@ -801,6 +809,64 @@ additionalRequirementsSpecialLanguageRule:
                         </div>
                     </div>
                 </div>
+
+                  {/* Notes */}
+                                                <div className={formStyles.section}>
+                                                    <h2 className={formStyles.sectionTitle}>Notes</h2>
+                                                    <div className={formStyles.arrayField}>
+                                                        {formData.notes.map((note, idx) => (
+                                                            <div key={idx} className={formStyles.arrayItem}>
+                                                                <div
+                                                                    className={formStyles.input}
+                                                                    style={{ display: "block" }}
+                                                                >
+                                                                    {note}
+                                                                </div>
+                                                                <button
+                                                                    type="button"
+                                                                    onClick={() =>
+                                                                        setFormData((prev) => ({
+                                                                            ...prev,
+                                                                            notes: prev.notes.filter(
+                                                                                (_, i) => i !== idx,
+                                                                            ),
+                                                                        }))
+                                                                    }
+                                                                    className={formStyles.removeBtn}
+                                                                    disabled={isLoading}
+                                                                >
+                                                                    <FiX />
+                                                                </button>
+                                                            </div>
+                                                        ))}
+                                                        <div className={formStyles.arrayItem}>
+                                                            <input
+                                                                type="text"
+                                                                value={noteDraft}
+                                                                onChange={(e) => setNoteDraft(e.target.value)}
+                                                                className={formStyles.input}
+                                                                disabled={isLoading}
+                                                                placeholder="- Bullet point"
+                                                            />
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => {
+                                                                    const trimmed = noteDraft.trim();
+                                                                    if (!trimmed) return;
+                                                                    setFormData((prev) => ({
+                                                                        ...prev,
+                                                                        notes: [...prev.notes, trimmed],
+                                                                    }));
+                                                                    setNoteDraft("");
+                                                                }}
+                                                                className={formStyles.addBtn}
+                                                                disabled={isLoading || !noteDraft.trim()}
+                                                            >
+                                                                <FiPlus /> Add Note
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                </div>
 
                 {/* Language Requirements */}
                 <div className={formStyles.section}>
@@ -1275,8 +1341,8 @@ additionalRequirementsSpecialLanguageRule:
                                             )
                                         }
                                     />
-                                 &nbsp;Enable &quot;Any N subjects (level 3)&quot;
-                                    requirement
+                                    &nbsp;Enable &quot;Any N subjects (level
+                                    3)&quot; requirement
                                 </label>
                             </div>
 
