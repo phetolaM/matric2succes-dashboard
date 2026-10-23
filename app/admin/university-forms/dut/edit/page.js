@@ -32,6 +32,7 @@ const levelOptions = ["Higher Certificate", "Diploma", "Bachelors Degree"];
 
 const facultyOptions = [
     "Faculty of Accounting and Informatics",
+    "Faculty of Applied Sciences",
     "Faculty of Arts and Design",
     "Faculty of Engineering and The Build Environment",
     "Faculty Health Sciences",
@@ -446,7 +447,7 @@ function EditCourseDUTContent() {
                     : Number(v);
 
             const cleanData = {
-                  notes: formData.notes.filter((n) => n.trim()),
+                notes: formData.notes.filter((n) => n.trim()),
                 apsRequirement: normInt(formData.apsRequirement),
                 additionalRequirementsSpecialActive:
                     !!formData.additionalRequirementsSpecialActive,
@@ -811,63 +812,63 @@ function EditCourseDUTContent() {
                     </div>
                 </div>
 
-                  {/* Notes */}
-                                                <div className={formStyles.section}>
-                                                    <h2 className={formStyles.sectionTitle}>Notes</h2>
-                                                    <div className={formStyles.arrayField}>
-                                                        {formData.notes.map((note, idx) => (
-                                                            <div key={idx} className={formStyles.arrayItem}>
-                                                                <div
-                                                                    className={formStyles.input}
-                                                                    style={{ display: "block" }}
-                                                                >
-                                                                    {note}
-                                                                </div>
-                                                                <button
-                                                                    type="button"
-                                                                    onClick={() =>
-                                                                        setFormData((prev) => ({
-                                                                            ...prev,
-                                                                            notes: prev.notes.filter(
-                                                                                (_, i) => i !== idx,
-                                                                            ),
-                                                                        }))
-                                                                    }
-                                                                    className={formStyles.removeBtn}
-                                                                    disabled={isLoading}
-                                                                >
-                                                                    <FiX />
-                                                                </button>
-                                                            </div>
-                                                        ))}
-                                                        <div className={formStyles.arrayItem}>
-                                                            <input
-                                                                type="text"
-                                                                value={noteDraft}
-                                                                onChange={(e) => setNoteDraft(e.target.value)}
-                                                                className={formStyles.input}
-                                                                disabled={isLoading}
-                                                                placeholder="- Bullet point"
-                                                            />
-                                                            <button
-                                                                type="button"
-                                                                onClick={() => {
-                                                                    const trimmed = noteDraft.trim();
-                                                                    if (!trimmed) return;
-                                                                    setFormData((prev) => ({
-                                                                        ...prev,
-                                                                        notes: [...prev.notes, trimmed],
-                                                                    }));
-                                                                    setNoteDraft("");
-                                                                }}
-                                                                className={formStyles.addBtn}
-                                                                disabled={isLoading || !noteDraft.trim()}
-                                                            >
-                                                                <FiPlus /> Add Note
-                                                            </button>
-                                                        </div>
-                                                    </div>
-                                                </div>
+                {/* Notes */}
+                <div className={formStyles.section}>
+                    <h2 className={formStyles.sectionTitle}>Notes</h2>
+                    <div className={formStyles.arrayField}>
+                        {formData.notes.map((note, idx) => (
+                            <div key={idx} className={formStyles.arrayItem}>
+                                <div
+                                    className={formStyles.input}
+                                    style={{ display: "block" }}
+                                >
+                                    {note}
+                                </div>
+                                <button
+                                    type="button"
+                                    onClick={() =>
+                                        setFormData((prev) => ({
+                                            ...prev,
+                                            notes: prev.notes.filter(
+                                                (_, i) => i !== idx,
+                                            ),
+                                        }))
+                                    }
+                                    className={formStyles.removeBtn}
+                                    disabled={isLoading}
+                                >
+                                    <FiX />
+                                </button>
+                            </div>
+                        ))}
+                        <div className={formStyles.arrayItem}>
+                            <input
+                                type="text"
+                                value={noteDraft}
+                                onChange={(e) => setNoteDraft(e.target.value)}
+                                className={formStyles.input}
+                                disabled={isLoading}
+                                placeholder="- Bullet point"
+                            />
+                            <button
+                                type="button"
+                                onClick={() => {
+                                    const trimmed = noteDraft.trim();
+                                    if (!trimmed) return;
+                                    setFormData((prev) => ({
+                                        ...prev,
+                                        notes: [...prev.notes, trimmed],
+                                    }));
+                                    setNoteDraft("");
+                                }}
+                                className={formStyles.addBtn}
+                                disabled={isLoading || !noteDraft.trim()}
+                            >
+                                <FiPlus /> Add Note
+                            </button>
+                        </div>
+                    </div>
+                </div>
 
                 {/* Language Requirements */}
                 <div className={formStyles.section}>

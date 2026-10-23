@@ -32,6 +32,7 @@ const levelOptions = ["Higher Certificate", "Diploma", "Bachelors Degree"];
 
 const facultyOptions = [
     "Faculty of Accounting and Informatics",
+    "Faculty of Applied Sciences",
     "Faculty of Arts and Design",
     "Faculty of Engineering and The Build Environment",
     "Faculty Health Sciences",
