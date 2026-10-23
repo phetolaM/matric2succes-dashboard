@@ -31,7 +31,7 @@ const methodOptions = [
 const levelOptions = ["Higher Certificate", "Diploma", "Bachelors Degree"];
 
 const facultyOptions = [
-     "Faculty of Accounting and Informatics",
+    "Faculty of Accounting and Informatics",
     "Faculty of Arts and Design",
     "Faculty of Engineering and The Build Environment",
     "Faculty Health Sciences",
@@ -50,30 +50,31 @@ export default function AddCourseDUTPage() {
     const [subjects, setSubjects] = useState([]);
     const [languageSubjects, setLanguageSubjects] = useState([]);
     const [careerChoiceDraft, setCareerChoiceDraft] = useState("");
+    const [noteDraft, setNoteDraft] = useState("");
 
     const [formData, setFormData] = useState({
-    courseName: "",
-    courseCode: "",
-    faculty: "",
-    qualificationLevel: "",
-    duration: "",
-    methodOfStudy: "Full-time",
-    apsRequirement: "",
-    careerChoices: [],
-    languageRequirementOperator: "both",
-    languageRequirements: [],
-    subjectRequirements: [],
-    subjectRequirementGroups: [],
-    subjectCombinationGroups: [],
-     notes: [],
+        courseName: "",
+        courseCode: "",
+        faculty: "",
+        qualificationLevel: "",
+        duration: "",
+        methodOfStudy: "Full-time",
+        apsRequirement: "",
+        careerChoices: [],
+        languageRequirementOperator: "both",
+        languageRequirements: [],
+        subjectRequirements: [],
+        subjectRequirementGroups: [],
+        subjectCombinationGroups: [],
+        notes: [],
 
-    // Combined additional subjects requirement
-    additionalRequirementsSpecialActive: false,
-    additionalRequirementsSpecialCount: 3,
-    additionalRequirementsSpecialMinPercentage: "",
-    additionalRequirementsSpecialIncludeLO: true,
-    additionalRequirementsSpecialLanguageRule: "max1", // "none" | "max1" | "any"
-});
+        // Combined additional subjects requirement
+        additionalRequirementsSpecialActive: false,
+        additionalRequirementsSpecialCount: 3,
+        additionalRequirementsSpecialMinPercentage: "",
+        additionalRequirementsSpecialIncludeLO: false,
+        additionalRequirementsSpecialLanguageRule: "max1", // "none" | "max1" | "any"
+    });
 
     // Fetch subjects on mount
     useEffect(() => {
@@ -370,7 +371,7 @@ export default function AddCourseDUTPage() {
                     : Number(v);
 
             const cleanData = {
-                   notes: formData.notes.filter((n) => n.trim()),
+                notes: formData.notes.filter((n) => n.trim()),
                 apsRequirement: normInt(formData.apsRequirement),
                 additionalRequirementsSpecialActive:
                     !!formData.additionalRequirementsSpecialActive,
@@ -682,58 +683,63 @@ export default function AddCourseDUTPage() {
                     </div>
                 </div>
 
-                  {/* Notes */}
-        <div className={formStyles.section}>
-          <h2 className={formStyles.sectionTitle}>Notes</h2>
-          <div className={formStyles.arrayField}>
-            {formData.notes.map((note, idx) => (
-              <div key={idx} className={formStyles.arrayItem}>
-                <div className={formStyles.input} style={{ display: "block" }}>
-                  {note}
+                {/* Notes */}
+                <div className={formStyles.section}>
+                    <h2 className={formStyles.sectionTitle}>Notes</h2>
+                    <div className={formStyles.arrayField}>
+                        {formData.notes.map((note, idx) => (
+                            <div key={idx} className={formStyles.arrayItem}>
+                                <div
+                                    className={formStyles.input}
+                                    style={{ display: "block" }}
+                                >
+                                    {note}
+                                </div>
+                                <button
+                                    type="button"
+                                    onClick={() =>
+                                        setFormData((prev) => ({
+                                            ...prev,
+                                            notes: prev.notes.filter(
+                                                (_, i) => i !== idx,
+                                            ),
+                                        }))
+                                    }
+                                    className={formStyles.removeBtn}
+                                    disabled={isLoading}
+                                >
+                                    <FiX />
+                                </button>
+                            </div>
+                        ))}
+                        <div className={formStyles.arrayItem}>
+                            <input
+                                type="text"
+                                value={noteDraft}
+                                onChange={(e) => setNoteDraft(e.target.value)}
+                                className={formStyles.input}
+                                disabled={isLoading}
+                                placeholder="- Bullet point"
+                            />
+                            <button
+                                type="button"
+                                onClick={() => {
+                                    const trimmed = noteDraft.trim();
+                                    if (!trimmed) return;
+                                    setFormData((prev) => ({
+                                        ...prev,
+                                        notes: [...prev.notes, trimmed],
+                                    }));
+                                    setNoteDraft("");
+                                }}
+                                className={formStyles.addBtn}
+                                disabled={isLoading || !noteDraft.trim()}
+                            >
+                                <FiPlus /> Add Note
+                            </button>
+                        </div>
+                    </div>
                 </div>
-                <button
-                  type="button"
-                  onClick={() =>
-                    setFormData((prev) => ({
-                      ...prev,
-                      notes: prev.notes.filter((_, i) => i !== idx),
-                    }))
-                  }
-                  className={formStyles.removeBtn}
-                  disabled={isLoading}
-                >
-                  <FiX />
-                </button>
-              </div>
-            ))}
-            <div className={formStyles.arrayItem}>
-              <input
-                type="text"
-                value={noteDraft}
-                onChange={(e) => setNoteDraft(e.target.value)}
-                className={formStyles.input}
-                disabled={isLoading}
-                placeholder="- Bullet point"
-              />
-              <button
-                type="button"
-                onClick={() => {
-                  const trimmed = noteDraft.trim();
-                  if (!trimmed) return;
-                  setFormData((prev) => ({
-                    ...prev,
-                    notes: [...prev.notes, trimmed],
-                  }));
-                  setNoteDraft("");
-                }}
-                className={formStyles.addBtn}
-                disabled={isLoading || !noteDraft.trim()}
-              >
-                <FiPlus /> Add Note
-              </button>
-            </div>
-          </div>
-        </div>
 
                 {/* Language Requirements */}
                 <div className={formStyles.section}>
@@ -1187,9 +1193,6 @@ export default function AddCourseDUTPage() {
                     </button>
                 </div>
 
-
-
-
                 {/* Additional subjects requirement */}
                 <div style={{ marginBottom: "1rem" }}>
                     <div className={formStyles.fieldGroup}>
@@ -1320,40 +1323,44 @@ export default function AddCourseDUTPage() {
                                 </select>
                             </div>
 
+                            <div className={formStyles.fieldGroup}>
+                                <div
+                                    style={{
+                                        display: "flex",
+                                        alignItems: "center",
+                                        gap: "0.75rem",
+                                    }}
+                                >
+                                    {/* Notice the formStyles references below */}
+                                    <label className={styles.switch2}>
+                                        <input
+                                            type="checkbox"
+                                            className={styles.checkbox2}
+                                            checked={
+                                                formData.additionalRequirementsSpecialIncludeLO
+                                            }
+                                            onChange={(e) =>
+                                                handleChange(
+                                                    "additionalRequirementsSpecialIncludeLO",
+                                                    e.target.checked,
+                                                )
+                                            }
+                                            disabled={isLoading}
+                                        />
+                                        <div className={styles.slider2}></div>
+                                    </label>
 
-
-
-                           <div className={formStyles.fieldGroup}>
-    <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
-        {/* Notice the formStyles references below */}
-        <label className={styles.switch2}>
-            <input
-                type="checkbox"
-                className={styles.checkbox2}
-                checked={formData.additionalRequirementsSpecialIncludeLO}
-                onChange={(e) =>
-                    handleChange(
-                        "additionalRequirementsSpecialIncludeLO",
-                        e.target.checked
-                    )
-                }
-                disabled={isLoading}
-            />
-            <div className={styles.slider2}></div>
-        </label>
-
-        <span style={{ fontSize: "0.95rem", fontWeight: 600, color: "#1f2937" }}>
-            LO can count as one of these subjects
-        </span>
-    </div>
-</div>
-
-
-
-
-
-
-
+                                    <span
+                                        style={{
+                                            fontSize: "0.95rem",
+                                            fontWeight: 600,
+                                            color: "#1f2937",
+                                        }}
+                                    >
+                                        LO can count as one of these subjects
+                                    </span>
+                                </div>
+                            </div>
                         </div>
                     )}
                 </div>

@@ -55,6 +55,7 @@ function EditCourseDUTContent() {
     const [subjects, setSubjects] = useState([]);
     const [languageSubjects, setLanguageSubjects] = useState([]);
     const [careerChoiceDraft, setCareerChoiceDraft] = useState("");
+    const [noteDraft, setNoteDraft] = useState("");
 
     const [formData, setFormData] = useState({
         courseName: "",

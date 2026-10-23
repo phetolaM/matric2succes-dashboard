@@ -34,6 +34,7 @@ const DUTCourseSchema = new mongoose.Schema(
         duration: { type: String, trim: true },
         methodOfStudy: { type: String, trim: true },
         careerChoices: { type: [String], default: [] },
+        notes: { type: [String], default: [] },
         apsRequirement: { type: Number },
         languageRequirements: {
             type: [
