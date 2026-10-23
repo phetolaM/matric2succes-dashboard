@@ -31,6 +31,7 @@ const UNIVERSITIES_WITH_FORMS = [
 
     // new forms without AI
     "cput",
+    "dut",
 ];
 
 const getUniversityDisplayName = (collectionName) => {

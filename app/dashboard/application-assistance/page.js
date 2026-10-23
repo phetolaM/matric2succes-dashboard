@@ -418,7 +418,7 @@ export default function ApplicationAssistancePage() {
                                 {notAppliedCount} universit{notAppliedCount === 1 ? "y" : "ies"} still not applied
                             </p>
                             <p className={styles.urgentBannerBody}>
-                                These universities haven't been applied to yet. Open each client to update their status.
+                                These universities have not been applied to yet. Open each client to update their status.
                             </p>
                             <div className={styles.urgentBannerItems}>
                                 {urgentUnapplied.map((item, i) => (

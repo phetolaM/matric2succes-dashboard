@@ -247,7 +247,7 @@ export default function AdminUsersPage() {
                     <div className={styles.emptyState}>
                         <FaUserShield className={styles.emptyIcon} />
                         <h3>No Admin Users Found</h3>
-                        <p>Click "Add New Admin" to create your first administrator account</p>
+                        <p>Click &quot;Add New Admin&quot; to create your first administrator account</p>
                     </div>
                 ) : (
                     <div className={styles.tableCard}>

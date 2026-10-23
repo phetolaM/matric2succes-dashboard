@@ -1,4 +1,5 @@
 import dotenv from "dotenv";
+import { connectUserListDB } from "../config/userListDB/userListDB.js";
 import UserList from "../models/userListModel.js";
 import { sendNodemailerEmail } from "./nodemailerClient.js";
 import { sendCustomEmail } from "./mailgunClient.js";
@@ -24,7 +25,7 @@ async function processDueBatch() {
             const claimed = await UserList.findOneAndUpdate(
                 { _id: u._id, emailSent: false, processing: { $ne: true } },
                 { $set: { processing: true } },
-                { new: true }
+                { new: true },
             );
             if (!claimed) continue; // someone else is processing
 
@@ -32,22 +33,22 @@ async function processDueBatch() {
                 try {
                     await sendNodemailerEmail(
                         claimed.email,
-                        claimed.name || "User"
+                        claimed.name || "User",
                     );
                 } catch (err) {
                     console.error(
                         "Worker: nodemailer failed for",
                         claimed.email,
-                        err?.message || err
+                        err?.message || err,
                     );
                     // fallback to Mailgun
                     await sendCustomEmail(
                         claimed.email,
-                        claimed.name || "User"
+                        claimed.name || "User",
                     );
                     console.log(
                         "Worker: fallback mailgun success for",
-                        claimed.email
+                        claimed.email,
                     );
                 }
 
@@ -64,7 +65,7 @@ async function processDueBatch() {
                 console.error(
                     "Worker: failed to send for",
                     claimed.email,
-                    err?.message || err
+                    err?.message || err,
                 );
                 claimed.processing = false;
                 claimed.sendAttempts = (claimed.sendAttempts || 0) + 1;
@@ -77,21 +78,26 @@ async function processDueBatch() {
     }
 }
 
-export function startScheduledEmailWorker() {
-    if (process.env.SCHEDULER_ENABLED === "false") {
+export async function startScheduledEmailWorker() {
+    if (String(process.env.SCHEDULER_ENABLED || "").toLowerCase() !== "true") {
         console.log(
-            "Scheduled email worker disabled via SCHEDULER_ENABLED=false"
+            "Scheduled email worker disabled unless SCHEDULER_ENABLED=true",
         );
-        return;
+        return { started: false, reason: "disabled" };
     }
-    if (timer) return; // already started
+
+    if (timer) return { started: true, reason: "already-running" };
+
+    await connectUserListDB();
+
     console.log(
         "Starting scheduled email worker, poll interval:",
-        POLL_INTERVAL
+        POLL_INTERVAL,
     );
     timer = setInterval(processDueBatch, POLL_INTERVAL);
     // run immediately once
     processDueBatch().catch((e) => console.error(e));
+    return { started: true, reason: "started" };
 }
 
 export function stopScheduledEmailWorker() {

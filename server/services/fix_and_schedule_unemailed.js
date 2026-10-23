@@ -42,7 +42,7 @@ async function scheduleForUser(user) {
                         console.log("Scheduled fallback: sent via Mailgun to", fresh.email);
                     } catch (mgErr) {
                         console.error("Scheduled fallback Mailgun failed:", mgErr);
-                        continue;
+                        return;
                     }
                 }
 
